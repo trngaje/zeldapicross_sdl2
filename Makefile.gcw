@@ -41,7 +41,7 @@ clean:
 	rm -f $(PRGNAME)$(EXESUFFIX) *.o
 
 pack:
-	mv $(PRGNAME) ./opk/(PRGNAME)
+	mv $(PRGNAME) ./opk/$(PRGNAME)
 	cp -r ./data ./opk/data
 	mksquashfs ./opk zeldapicross.opk -all-root -noappend -no-exports -no-xattrs
 	rm -r ./opk/data
