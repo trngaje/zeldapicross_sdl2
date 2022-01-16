@@ -89,10 +89,12 @@ void Transition::loop() {
             else if (step == OUT) {
                 rayon = anim;
             }
-#ifndef OGS_SDL2            
+#ifdef OGS_SDL2  
+            SDL_SetColorKey(image,SDL_TRUE, SDL_MapRGB(image->format,0,0,255));   
+#else          
             filledEllipseRGBA(image, x, y, rayon, rayon*2/3, 0, 0, 255, 255);
-#endif
             SDL_SetColorKey(image,SDL_SRCCOLORKEY, SDL_MapRGB(image->format,0,0,255));
+#endif
             break;
         default : break;
     }
@@ -113,7 +115,9 @@ void Transition::draw(SDL_Surface* gpScreen) {
         case CIRCLE :
             src.w = 320; src.h = 240; src.x = 0; src.y = 0; 
             dst.y = 0; dst.x = 0;
+#ifndef OGS_SDL2            
             SDL_BlitSurface(image, &src, gpScreen, &dst);
+#endif
             break;
         default : break;
     }

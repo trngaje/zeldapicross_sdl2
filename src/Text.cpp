@@ -457,6 +457,8 @@ bool Text::isToDisplay() {
 
 void Text::setNumber(int n) {
     number = n;
+}
+
 #if 1
 unsigned short Text::utf8_to_unicode(unsigned char c1, unsigned char c2, unsigned char c3)
 {
@@ -505,5 +507,5 @@ int Text::utf8offset(std::string s, int limit)
 		   return i;
    }
    return i;
-#endif
 }
+#endif
