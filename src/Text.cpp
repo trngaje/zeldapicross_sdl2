@@ -12,8 +12,13 @@
 #include <fstream>
 #include <iostream>
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#else
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+#endif
 
 #include "Text.h"
 #include "Common.h"
@@ -33,10 +38,16 @@ Text::~Text() {
 void Text::init() {
     lastAnimTime = SDL_GetTicks();
     imageFont = Resources::getInstance()->getFont();
-    ifstream file("data/texts/texts.txt");
+    ifstream file("data/texts/texts_kor.txt");
+    //ifstream file("data/texts/texts.txt");
     string line;
     int i = 1;
+	int length;
     while (getline(file, line) && i <= MAX_TEXTS) {
+		length = line.length();
+		if (line.at(length-1) == 0x0d) /* need to remove 0x0d character in texts~.txt */
+			line.erase(length-1,1);
+		
         texts[i++] = line;
     }
     file.close();
@@ -101,6 +112,26 @@ string Text::getTime(int i) {
 }
 
 void Text::affiche(SDL_Surface* gpScreen, std::string s, int a, int b) {
+#if 1
+    // hangul
+	unsigned short c;
+    for (int i = 0; i < (int)s.length(); i++) 
+    { 
+		if (s.at(i) & 0x80) {
+			c = utf8_to_unicode(s.at(i), s.at(i+1), s.at(i+2));
+		} else 
+			c= s.at(i);
+		if (c >= 0xac00 && c <= 0xd7a3) { // unicode hangul code range 
+			displayLetter_kor(gpScreen, c,a,b);
+			a+=12;
+			i+=2;						
+		}
+		else {
+			displayLetter(gpScreen, s.at(i),a,b);
+			a+=6;
+		}
+    }    
+#else
 	// FIX: gameblabla
 	//less one to the length so that it prints the text properly without repeated letters
     for (int i = 0; i < (int)s.length()-1; i++) 
@@ -109,25 +140,53 @@ void Text::affiche(SDL_Surface* gpScreen, std::string s, int a, int b) {
         a+=6;
     }
     //toDisplay = true;
+#endif
 }
 
 void Text::draw(SDL_Surface* gpScreen) {
-    
+#if 1
+    unsigned short c;
+#endif    
     if (cadre) {
         Cadre::getInstance()->drawCadre(gpScreen, x, y, w, h, cadre - 1);
     }
     
     int a = x+8; int b = y+8;
     for (int i = 0; i < av; i++) {
+#if 1
+		if ((text.at(i) & 0x80) && (i < (av-2))) { // need boundary checking
+			c = utf8_to_unicode(text.at(i), text.at(i+1), text.at(i+2));
+		} else 
+			c= text.at(i);
+		if (c >= 0xac00 && c <= 0xd7a3) { // unicode hangul code range 
+			displayLetter_kor(gpScreen, c,a,b);
+			a+=12;
+			i+=2;
+		}
+		else {
+			displayLetter(gpScreen, text.at(i),a,b);
+			a+=6;
+		}
+#else    	
         displayLetter(gpScreen, text.at(i),a,b);
         a+=6;
+#endif
         if (a >= x+w-16) {a=x+8; b+=16;}
     }
     
     if(SDL_GetTicks() > lastAnimTime + vitesse && def && av < (int)text.length()) {
         lastAnimTime = SDL_GetTicks();
+#if 1
+        do {
+		  if ((text.at(av) & 0xC0) == 0xC0) // cjk font
+            av+=3;
+		  else
+			av++;
+        } while (av < (int)text.length() && text.at(av-1) == ' ');
+#else        
         do av++;
         while (av < (int)text.length() && text.at(av-1) == ' ');
+#endif        
         if (text.at(av-1) != ' ') Audio::getInstance()->playSound(0,1);
     }
 }
@@ -166,33 +225,40 @@ void Text::setText(int idTxt, int vx, int vy, int vw, int vh, int cadr, bool def
 }
 
 void Text::cutText() {
-    //compte le nombre de caractères possibles et largeur et en hauteur
+    //compte le nombre de caract?es possibles et largeur et en hauteur
     int nbcol = (w-16)/6 -1;
     int nblig = (h-16)/16;
     int tailleMax = nbcol * nblig;
     int taille;
   
+#if 1
+	/* kor */
+	int tailleMax_utf8 = utf8offset(text, tailleMax);
+    if ((int)text.length() > tailleMax_utf8) {
+        buffer = text.substr(tailleMax_utf8);
+        text = text.substr(0, tailleMax_utf8);
+#else
     int k = text.length() - 1;
     while (text.at(k)==' ') {
         text.erase(k--,1);
         if (k < 0) return;
     }
     
-    //parcours du texte à afficher; à chaque début de mot, 
-    //vérifie que le mot peut tenir sur la ligne
+    //parcours du texte ?afficher; ?chaque d?ut de mot, 
+    //v?ifie que le mot peut tenir sur la ligne
     for (int i = 0; i < (int)text.length(); i++) {
         
-        //on ne s'occupe que de la partie à afficher
+        //on ne s'occupe que de la partie ?afficher
         if (i >= tailleMax) {
             break;
         }
         
-        //supprime les espaces isolés en début de ligne
+        //supprime les espaces isol? en d?ut de ligne
         if (text.at(i)==' ' && text.at(i+1)!=' ' && i%nbcol == 0) text.erase(i,1);
-        //recherche du début du prochain mot
+        //recherche du d?ut du prochain mot
         while(text.at(i)==' ' && i < (int)text.length()-1) i++;
         
-        //saute une ligne si trouve une étoile
+        //saute une ligne si trouve une ?oile
         if (text.at(i)=='*') {
             text.erase(i,1);
             int nb = (nbcol)-(i%(nbcol));
@@ -200,7 +266,7 @@ void Text::cutText() {
             continue;
         }
         
-        //si le mot dépasse
+        //si le mot d?asse
         taille = wordSize(i);
         if ((i%nbcol)+taille>nbcol) {
             if  (i < tailleMax) {
@@ -209,7 +275,7 @@ void Text::cutText() {
                     text.insert(((i/nbcol)+1)*nbcol-1,"--");
                     i = 1+((i/nbcol)+1)*nbcol;
                 }
-                //sinon, on ajoute des espaces pour faire commencer le mot à la ligne
+                //sinon, on ajoute des espaces pour faire commencer le mot ?la ligne
                 else while((i%nbcol) != 0) {text.insert(i," "); i++;}
             }
         }
@@ -220,6 +286,7 @@ void Text::cutText() {
     if ((int)text.length() > tailleMax) {
         buffer = text.substr(tailleMax);
         text = text.substr(0, tailleMax);
+#endif
     }
 }
 
@@ -260,35 +327,35 @@ void Text::displayLetter(SDL_Surface* gpScreen, char c, int vx, int vy) {
             
     //majuscules A-Z
     if(val>=65 && val<=90) {src.x=6+16*((val-65)%10); src.y=2+16*((val-65)/10);}   
-    // ç
+    // ?
     if(val==-25) {src.x=148;src.y=34;}
-    // é
+    // ?
     if(val==-23) {src.x=100;src.y=84;}
-    // ê
+    // ?
     if(val==-22) {src.x=116;src.y=84;}
-    // è
+    // ?
     if(val==-24) {src.x=132;src.y=84;}
-    // ë
+    // ?
     if(val==-21) {src.x=132;src.y=151;}
-    // à
+    // ?
     if(val==-32) {src.x=148;src.y=84;}
-    // â
+    // ?
     if(val==-30) {src.x=148;src.y=103;}
-    // ä
+    // ?
     if(val==-28) {src.x=148;src.y=135;}
-    // î
+    // ?
     if(val==-18) {src.x=84;src.y=119;}
-    // ï
+    // ?
     if(val==-17) {src.x=116;src.y=151;}
-    // û
+    // ?
     if(val==-5) {src.x=84;src.y=103;}
-    // ù
+    // ?
     if(val==-7) {src.x=148;src.y=151;}
-    // ü
+    // ?
     if(val==-4) {src.x=116;src.y=135;}
-    // ö
+    // ?
     if(val==-10) {src.x=132;src.y=135;}
-    // ô
+    // ?
     if(val==-12) {src.x=148;src.y=119;}
             
     //ponctuation
@@ -323,6 +390,32 @@ void Text::displayLetter(SDL_Surface* gpScreen, char c, int vx, int vy) {
     SDL_BlitSurface(imageFont, &src, gpScreen, &dst);
 }
 
+#if 1
+void Text::displayLetter_kor(SDL_Surface* gpScreen, unsigned short c, int vx, int vy) {
+    SDL_Rect src;
+    SDL_Rect dst;
+    
+    int val = (int)c;
+    
+    dst.x=vx; dst.y=vy;
+    src.h=16;src.w=16;
+
+	// if (val >= 0xac00 && val <= 0xd7a3) { // unicode hangul code range   
+	// 0xb1be missing, ‡f
+	if (val >= 0xac00 && val < 0xb1be) { // unicode hangul code range    
+		src.x=4+16*((val-0xac00)%10); 
+		src.y=167+16*((val-0xac00)/10);
+		
+		SDL_BlitSurface(imageFont, &src, gpScreen, &dst);
+	}
+	else if (val > 0xb1be && val <= 0xd7a3) { // unicode hangul code range    
+		src.x=4+16*((val-0xac00-1)%10); 
+		src.y=167+16*((val-0xac00-1)/10);
+		
+		SDL_BlitSurface(imageFont, &src, gpScreen, &dst);
+	}	
+}
+#endif
 bool Text::hasNext() {
     return (buffer != "" || idsuiv > 0 || number > 1);
 }
@@ -364,4 +457,53 @@ bool Text::isToDisplay() {
 
 void Text::setNumber(int n) {
     number = n;
+#if 1
+unsigned short Text::utf8_to_unicode(unsigned char c1, unsigned char c2, unsigned char c3)
+{
+	unsigned short c=0;
+	
+	if ((c1 & 0xf0) == 0xe0)
+		if ((c2 & 0xc0) == 0x80)
+			if ((c3 & 0xc0) == 0x80)
+			{
+				c = ((c1 & 0xf) << 12) | ((c2 & 0x3f) << 6) | (c3 & 0x3f);
+				return c;
+			}
+			
+	return 0;
+}
+
+int Text::utf8len(std::string s)
+{
+   int ret = 0;
+
+   //if (!string)
+   //   return 0;
+
+   //while (*string)
+   for (int i = 0; i < (int)s.length(); i++) 
+   {
+      if (((s.at(i) & 0x80) == 0x0) || // english
+	  ((s.at(i) & 0xC0) == 0x80)) // cjk font
+         ret++;
+      //string++;
+   }
+   return ret;
+}
+
+int Text::utf8offset(std::string s, int limit)
+{
+   int ret = 0;
+   int i=0;
+   for (i = 0; i < (int)s.length(); i++) 
+   {
+      if (((s.at(i) & 0x80) == 0x0) || // english
+	  ((s.at(i) & 0xC0) == 0x80)) // cjk font
+         ret++;
+	   
+	   if (ret > limit)
+		   return i;
+   }
+   return i;
+#endif
 }

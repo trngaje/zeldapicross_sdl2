@@ -14,6 +14,9 @@
 #include "Resources.h"
 #include "Audio.h"
 
+#ifdef OGS_SDL2
+extern SDL_Window* sdlWindow;
+#endif
 Uint32 getPixel(SDL_Surface *surface, int x, int y) {
     int bpp = surface->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to retrieve */
@@ -63,7 +66,11 @@ void Picross::init(SDL_Surface* pcs, SDL_Surface* thm, PicrossMode pMode) {
     xmin = x; xmax = x + width * 8 - 1; ymin = y; ymax = y + height * 8 - 1;
     xmouse = xmin + ((xmax - xmin) / 2);
     ymouse = ymin + ((ymax - ymin) / 2);
+#ifdef OGS_SDL2
+    SDL_WarpMouseInWindow(sdlWindow, xmouse, ymouse);
+#else
     SDL_WarpMouse(xmouse, ymouse);
+#endif
     
     cursorX = useMouse ? width / 2 : 0;
     cursorY = useMouse ? height / 2 : 0;
@@ -78,7 +85,11 @@ void Picross::init(SDL_Surface* pcs, SDL_Surface* thm, PicrossMode pMode) {
             if (i >= width || j >= height) {
                 hidden[i][j] = EMPTY;
             } else {
+#ifdef OGS_SDL2
+                hidden[i][j] = ((getPixel(pcs, i, j) & 0xffffff) == 0 ? OK : KO);
+#else
                 hidden[i][j] = (getPixel(pcs, i, j) == 0 ? OK : KO);
+#endif
             }
         }
     }
@@ -854,7 +865,11 @@ void Picross::handleEvent(Event* event) {
         if (useMouse) {
             xmouse = PICROSS_X + cursorX * 8 + 4;
             ymouse = PICROSS_Y + cursorY * 8 + 4;
+#ifdef OGS_SDL2
+            SDL_WarpMouseInWindow(sdlWindow, xmouse, ymouse);
+#else
             SDL_WarpMouse(xmouse, ymouse);
+#endif
         }
     }
     
@@ -889,7 +904,11 @@ void Picross::handleMouseEvent(Event* event) {
     if (xmouse > xmax) {xmouse = xmax; toReset = true;}
     if (ymouse < ymin) {ymouse = ymin; toReset = true;}
     if (ymouse > ymax) {ymouse = ymax; toReset = true;}
+#ifdef OGS_SDL2
+    if (toReset) SDL_WarpMouseInWindow(sdlWindow, xmouse, ymouse);
+#else
     if (toReset) SDL_WarpMouse(xmouse, ymouse);
+#endif
     
     cursorX = (xmouse - xmin) / 8;
     cursorY = (ymouse - ymin) / 8;

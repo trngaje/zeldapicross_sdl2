@@ -11,7 +11,11 @@
 #ifndef __TITRE_H__
 #define __TITRE_H__
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #include "Event.h"
 

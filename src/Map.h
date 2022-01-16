@@ -11,7 +11,11 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #include "Common.h"
 #include "CaseMap.h"

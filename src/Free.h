@@ -11,7 +11,11 @@
 #ifndef __FREE_H__
 #define __FREE_H__
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #include "Event.h"
 #include "Joueur.h"

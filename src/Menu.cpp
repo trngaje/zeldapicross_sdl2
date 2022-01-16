@@ -11,7 +11,11 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #include "Menu.h"
 #include "Resources.h"
@@ -111,7 +115,11 @@ void Menu::start() {
     
     //mode
     if (imageMode == NULL) {
+#ifdef OGS_SDL2
+        imageMode = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16, 72+32+16, 32, 0, 0, 0, 0);
+#else
         imageMode = SDL_CreateRGBSurface(SDL_HWSURFACE, 112+16, 72+32+16, 32, 0, 0, 0, 0);
+#endif
         cadre(0, 0, 112+16, 72+32+16, imageMode);
         string text = Text::getInstance()->getText(TEXTS_BEFORE_MENU + 19);
         Text::getInstance()->affiche(imageMode, text, 29, 12);
@@ -127,13 +135,21 @@ void Menu::start() {
     
     //profil
     if (imageBaseProfil == NULL) {
+#ifdef OGS_SDL2
+        imageBaseProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
+#else
         imageBaseProfil = SDL_CreateRGBSurface(SDL_HWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
+#endif
         cadre(0, 0, 112+16*6, 72+32+16, imageBaseProfil);
     }
     
     //erase
     if (imageDelete == NULL) {
+#ifdef OGS_SDL2
+        imageDelete = SDL_CreateRGBSurface(SDL_SWSURFACE, 112, 72, 32, 0, 0, 0, 0);
+#else
         imageDelete = SDL_CreateRGBSurface(SDL_HWSURFACE, 112, 72, 32, 0, 0, 0, 0);
+#endif
         cadre(0, 0, 112, 72, imageDelete);
         string text = Text::getInstance()->getText(TEXTS_BEFORE_MENU + 16);
         Text::getInstance()->affiche(imageDelete, text, 29, 9);
@@ -148,7 +164,11 @@ void Menu::start() {
     // build background
     SDL_Surface* imageTmp = Resources::getInstance()->getCadreMenu();
     if (image != NULL) SDL_FreeSurface(image);
+#ifdef OGS_SDL2
+    image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#else
     image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#endif
     
     SDL_Rect src;
     SDL_Rect dst;
@@ -228,7 +248,11 @@ Menu* Menu::getInstance() {
 void Menu::initProfil() {
     if (line != lastProfil) {
         SDL_FreeSurface(imageProfil);
+#ifdef OGS_SDL2
+        imageProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
+#else        
         imageProfil = SDL_CreateRGBSurface(SDL_HWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
+#endif
         
         SDL_Rect src;
         SDL_Rect dst;

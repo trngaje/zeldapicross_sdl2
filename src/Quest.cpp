@@ -449,7 +449,11 @@ void Quest::draw(SDL_Surface* gpScreen) {
             if (!gpMap->getPicrossToDo()) {
                 text += (" - " + gpText->getTime(gpMap->getCumulatedTime()));
             }
+#ifdef OGS_SDL2
+			width = 16 + gpText->utf8len(text) * 6;
+#else            
             width = 16 + text.length() * 6 + (16 - (text.length() * 6)%16)%16;
+#endif
             Cadre::getInstance()->drawCadre(gpScreen, 0, 0, width, 32);
             gpText->affiche(gpScreen, text, 8, 8);
             

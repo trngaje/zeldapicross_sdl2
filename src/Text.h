@@ -31,6 +31,10 @@ class Text {
         string getText(int i);
         string getTime(int i);
         void setNumber(int n);
+#if 1
+	    int utf8len(string s);
+		int utf8offset(std::string s, int limit);
+#endif
     private :
         static Text instance;
         
@@ -44,9 +48,13 @@ class Text {
         void cutText();
         int wordSize(int deb);
         void displayLetter(SDL_Surface* gpScreen, char c, int vx, int vy);
-        
+
+#if 1
+        void displayLetter_kor(SDL_Surface* gpScreen, unsigned short c, int vx, int vy);
+		unsigned short utf8_to_unicode(unsigned char c1, unsigned char c2, unsigned char c3);
+#endif        
         int vitesse; // millisecondes entre 2 lettres
-        int av; //avancement du défilement
+        int av; //avancement du d?ilement
         int x;
         int y;
         int w;
@@ -54,7 +62,7 @@ class Text {
         int id;
         int idsuiv;
         int number;
-        bool def; //si le texte doit défiler
+        bool def; //si le texte doit d?iler
         int cadre; //cadre : 0 = non, 1 = vert, 2 = bleu, 3 = rouge
         string text;
         string buffer;

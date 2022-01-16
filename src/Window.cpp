@@ -8,8 +8,13 @@
 
 */
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL2_rotozoom.h>
+#else
 #include <SDL/SDL.h>
 #include <SDL/SDL_rotozoom.h>
+#endif
 
 #include "Window.h"
 #include "Keyboard.h"
@@ -28,8 +33,13 @@ Window::~Window() {
     SDL_Quit();
 }
 
+#ifdef OGS_SDL2
+SDL_Window* sdlWindow=NULL;
+SDL_Surface* sdlSurface=NULL;
+int lcd_width, lcd_height;
+#endif
 SDL_Surface* init(bool* zoom) // initialise SDL
-{             
+{
     if(SDL_Init(SDL_INIT_VIDEO) == -1) 
     {
         printf("Could not load SDL : %s\n", SDL_GetError());
@@ -44,10 +54,25 @@ SDL_Surface* init(bool* zoom) // initialise SDL
     
     atexit(SDL_Quit);
 
+#ifdef OGS_SDL2
+	SDL_DisplayMode DM;
+	SDL_GetCurrentDisplayMode(0, &DM);
+        lcd_width = DM.w;
+        lcd_height = DM.h;
+
+	//printf("[trngaje] detected resolution = %d x %d\n", DM.w, DM.h);
+ 
+	sdlWindow = SDL_CreateWindow("Zelda Picross",
+                              SDL_WINDOWPOS_UNDEFINED,  
+                              SDL_WINDOWPOS_UNDEFINED,  
+                              lcd_width, lcd_height,
+                              SDL_WINDOW_OPENGL); 
+#else
     SDL_WM_SetCaption("Zelda Picross",NULL);
     SDL_Surface* icon = SDL_LoadBMP("data/images/logos/crayon.ico");
     SDL_SetColorKey(icon,SDL_SRCCOLORKEY,SDL_MapRGB(icon->format,0,0,0));
     SDL_WM_SetIcon(icon,NULL);
+#endif
     SDL_ShowCursor(SDL_DISABLE);
 
 
@@ -68,7 +93,13 @@ SDL_Surface* init(bool* zoom) // initialise SDL
         *zoom = true;
         return SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
     } else {*/
+    
+#ifdef OGS_SDL2
+    sdlSurface = SDL_GetWindowSurface(sdlWindow);
+	return SDL_CreateRGBSurface(SDL_SWSURFACE, lcd_width, lcd_height, 32, 0, 0, 0, 0);
+#else
         return SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
+#endif
     /*}*/
 }
 
@@ -78,6 +109,32 @@ void Window::loop() {
         return;
     }
     
+#ifdef OGS_SDL2
+   SDL_Rect src;
+    src.w=320; src.h=240; src.y=0; src.x=0;
+
+    int scale_w, scale_h, scale;
+    scale_w = (lcd_width / src.w);
+    scale_h = (lcd_height / src.h);
+    if (scale_w <= scale_h)
+        scale = scale_w;
+    else
+        scale = scale_h;
+
+    SDL_Rect dst;
+    if (scale == 1) {
+        dst.w=lcd_width;
+        dst.h=lcd_height;
+        dst.x=0;
+        dst.y=0;
+    }
+    else {
+        dst.w=src.w * scale;
+        dst.h=src.h * scale;
+        dst.x=(lcd_width - dst.w) / 2;
+        dst.y=(lcd_height - dst.h) / 2;
+    }
+#endif
     /*SDL_Rect src;
     SDL_Rect dst;
     src.w=640; src.h=480; src.y=0;src.x=0;dst.x=0; dst.y=0;*/
@@ -115,9 +172,14 @@ void Window::loop() {
         } else {
             SDL_BlitSurface(gpScreen2, &src, gpScreen, &dst);
         }*/
-        
+#ifdef OGS_SDL2
+		/* test routine */
+		//SDL_FillRect(gpScreen, NULL, SDL_MapRGB(gpScreen->format, 255, 0, 0));
+		SDL_BlitScaled(gpScreen, &src, sdlSurface, &dst);
+		SDL_UpdateWindowSurface(sdlWindow);
+#else        
         SDL_Flip(gpScreen);
-        
+#endif        
         if (SDL_GetTicks() < lastAnimTime + 20) {
             SDL_Delay(lastAnimTime+20-SDL_GetTicks());
         }
@@ -145,13 +207,21 @@ bool Window::handleEvent(Event* event, Game* gpGame) {
 }
 
 void Window::toggleFullScreen() {
+#ifdef OGS_SDL2
+	int gFullScreen = 0;
+#else
     int gFullScreen = (fullscreen ? 0 : SDL_FULLSCREEN);
+#endif
     gFullScreen ? SDL_ShowCursor(SDL_DISABLE) : SDL_ShowCursor(SDL_ENABLE);
     /*if (zoom || gFullScreen == 0) {
         gpScreen = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE
                                     |SDL_DOUBLEBUF|gFullScreen);
     } else {*/
+#ifdef OGS_SDL2
+		gpScreen = SDL_CreateRGBSurface(SDL_SWSURFACE, lcd_width, lcd_height, 32, 0, 0, 0, 0);
+#else
         gpScreen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
+#endif
     /*}*/
     fullscreen = (gFullScreen != 0);
 }

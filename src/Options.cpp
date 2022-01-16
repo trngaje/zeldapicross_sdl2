@@ -8,7 +8,11 @@
 
 */
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #include "Options.h"
 #include "Resources.h"
@@ -51,8 +55,11 @@ void Options::start() {
     
     // build background
     if (image != NULL) SDL_FreeSurface(image);
+#ifdef OGS_SDL2
+    image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#else
     image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
-    
+#endif    
     SDL_Rect src;
     SDL_Rect dst;
     src.x = 16; src.y = 16; src.w = 16; src.h = 16;

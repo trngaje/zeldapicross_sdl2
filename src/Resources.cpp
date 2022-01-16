@@ -83,9 +83,17 @@ Resources* Resources::getInstance() {
     return &instance;
 }
 
+#ifdef OGS_SDL2
+extern SDL_Window* sdlWindow;
+#endif
+
 SDL_Surface* Resources::convertImage(SDL_Surface* tmp) {
     if (tmp == NULL) return NULL;
+#ifdef OGS_SDL2
+    SDL_Surface* im = SDL_ConvertSurfaceFormat(tmp,  SDL_GetWindowPixelFormat(sdlWindow), 0);
+#else
     SDL_Surface* im = SDL_DisplayFormat(tmp);
+#endif
     SDL_FreeSurface(tmp);
     return im;
 }
@@ -109,7 +117,11 @@ SDL_Surface* Resources::getChiffres() {
         chiffres = IMG_Load("data/images/font/chiffres.png");
         if (chiffres) {
             SDL_SetColorKey(chiffres,
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(chiffres->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(chiffres->format,0,0,255));
+#endif
         }
         chiffres = convertImage(chiffres);
     }
@@ -155,7 +167,11 @@ SDL_Surface* Resources::getMap(int i) {
             ("data/images/map/map" + im.str() + ".png").c_str());
         if (map[i-1]) {
             SDL_SetColorKey(map[i-1],
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(map[i-1]->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(map[i-1]->format,0,0,255));
+#endif
         }
         map[i-1] = convertImage(map[i-1]);
     }
@@ -173,7 +189,11 @@ SDL_Surface* Resources::getIcon(int i) {
             ("data/images/icon/icon" + im.str() + ".png").c_str());
         if (icon[i]) {
             SDL_SetColorKey(icon[i],
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(icon[i]->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(icon[i]->format,0,0,255));
+#endif
         }
         icon[i] = convertImage(icon[i]);
     }
@@ -196,9 +216,15 @@ SDL_Surface* Resources::getPicrossBG(int i) {
 
 SDL_Surface* Resources::getFont() {
     if (font == 0) {
-        font = IMG_Load("data/images/font/font.png");
+    	/* add korean font */
+        font = IMG_Load("data/images/font/font_kor.png");
+        //font = IMG_Load("data/images/font/font.png");
         if (font) {
+#ifdef OGS_SDL2
+            SDL_SetColorKey(font,SDL_TRUE,
+#else
             SDL_SetColorKey(font,SDL_SRCCOLORKEY,
+#endif
                 SDL_MapRGB(font->format,0,0,255));
         }
         font = convertImage(font);
@@ -210,7 +236,11 @@ SDL_Surface* Resources::getLink() {
     if (link == 0) {
         link = IMG_Load("data/images/link/link.png");
         if (link) {
+#ifdef OGS_SDL2
+            SDL_SetColorKey(link,SDL_TRUE,
+#else
             SDL_SetColorKey(link,SDL_SRCCOLORKEY,
+#endif
                 SDL_MapRGB(link->format,0,0,255));
         }
         link = convertImage(link);
@@ -223,7 +253,11 @@ SDL_Surface* Resources::getStatus() {
         status = IMG_Load("data/images/icon/objets.png");
         if (status) {
             SDL_SetColorKey(status,
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(status->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(status->format,0,0,255));
+#endif
         }
         status = convertImage(status);
     }
@@ -235,7 +269,11 @@ SDL_Surface* Resources::getCadre() {
         cadre = IMG_Load("data/images/menu/bord.png");
         if (cadre) {
             SDL_SetColorKey(cadre,
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(cadre->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(cadre->format,0,0,255));
+#endif
         }
         cadre = convertImage(cadre);
     }
@@ -247,7 +285,11 @@ SDL_Surface* Resources::getBoss() {
         boss = IMG_Load("data/images/map/boss.png");
         if (boss) {
             SDL_SetColorKey(boss,
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(boss->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(boss->format,0,0,255));
+#endif
         }
         boss = convertImage(boss);
     }
@@ -275,7 +317,11 @@ SDL_Surface* Resources::getTitreLogo() {
         titreLogo = IMG_Load("data/images/logos/titre.png");
         if (titreLogo) {
             SDL_SetColorKey(titreLogo,
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(titreLogo->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(titreLogo->format,0,0,255));
+#endif
         }
         titreLogo = convertImage(titreLogo);
     }
@@ -287,7 +333,11 @@ SDL_Surface* Resources::getCadreMenu() {
         cadreMenu = IMG_Load("data/images/menu/cadres.png");
         if (cadreMenu) {
             SDL_SetColorKey(cadreMenu,
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(cadreMenu->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(cadreMenu->format,0,0,255));
+#endif
         }
         cadreMenu = convertImage(cadreMenu);
     }
@@ -299,7 +349,11 @@ SDL_Surface* Resources::getLinkMenu() {
         linkMenu = IMG_Load("data/images/menu/curseur.png");
         if (linkMenu) {
             SDL_SetColorKey(linkMenu,
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(linkMenu->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(linkMenu->format,0,0,255));
+#endif
         }
         linkMenu = convertImage(linkMenu);
     }
@@ -319,7 +373,11 @@ SDL_Surface* Resources::getMouse() {
         mouse = IMG_Load("data/images/icon/mouse.png");
         if (mouse) {
             SDL_SetColorKey(mouse,
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(mouse->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(mouse->format,0,0,255));
+#endif
         }
         mouse = convertImage(mouse);
     }
@@ -345,7 +403,11 @@ SDL_Surface* Resources::getIntroFond1() {
         introFond1 = IMG_Load("data/images/logos/fond1.png");
         if (introFond1) {
             SDL_SetColorKey(introFond1,
+#ifdef OGS_SDL2
+                SDL_TRUE,SDL_MapRGB(introFond1->format,0,0,255));
+#else
                 SDL_SRCCOLORKEY,SDL_MapRGB(introFond1->format,0,0,255));
+#endif
         }
         introFond1 = convertImage(introFond1);
     }

@@ -12,7 +12,11 @@
 #define __AUDIO_H__
 
 //#include <FMOD/fmod.h>
+#ifdef OGS_SDL2
+#include <SDL2/SDL_mixer.h>
+#else
 #include <SDL/SDL_mixer.h>
+#endif
 
 #define FSOUND_FREE 1
 class Audio {

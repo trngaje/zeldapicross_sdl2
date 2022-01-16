@@ -56,8 +56,13 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#else
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+#endif
 
 using namespace std;
 
@@ -65,7 +70,7 @@ enum QuestMode {WORLD_MAP, RESOLVE_PICROSS};
 
 enum FreeMode {FREE_MAIN, SELECT_PICROSS, FREE_PICROSS};
 
-enum PicrossMode {NORMAL, LIBRE}; //erreurs indiquées ou non
+enum PicrossMode {NORMAL, LIBRE}; //erreurs indiqu?s ou non
 
 enum MenuMode {SELECT_SAVE, SELECT_MODE, PROFIL, DELETE};
 

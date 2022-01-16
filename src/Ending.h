@@ -11,7 +11,11 @@
 #ifndef __ENDING_H__
 #define __ENDING_H__
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #include "Event.h"
 #include "Common.h"

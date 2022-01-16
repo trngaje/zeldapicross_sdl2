@@ -11,7 +11,11 @@
 #ifndef __CADRE_H__
 #define __CADRE_H__
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 class Cadre {
     public :

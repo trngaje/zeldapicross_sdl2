@@ -8,8 +8,13 @@
 
 */
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+#else
 #include <SDL/SDL.h>
 #include <SDL/SDL_gfxPrimitives.h>
+#endif
 
 #include "Transition.h"
 
@@ -30,7 +35,11 @@ Transition* Transition::getInstance() {
 void Transition::init(TransitionMode m) {
     mode = m;
     SDL_FreeSurface(image);
+#ifdef OGS_SDL2
+    image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#else
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 16, 0, 0, 0, 0);
+#endif
     switch (mode) 
     {
         case CIRCLE : animMax = 320; break;
@@ -80,7 +89,9 @@ void Transition::loop() {
             else if (step == OUT) {
                 rayon = anim;
             }
+#ifndef OGS_SDL2            
             filledEllipseRGBA(image, x, y, rayon, rayon*2/3, 0, 0, 255, 255);
+#endif
             SDL_SetColorKey(image,SDL_SRCCOLORKEY, SDL_MapRGB(image->format,0,0,255));
             break;
         default : break;

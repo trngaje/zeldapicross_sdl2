@@ -8,7 +8,11 @@
 
 */
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #include "Free.h"
 #include "Resources.h"
@@ -43,8 +47,11 @@ void Free::init() {
     SDL_Surface* imageTmp = Resources::getInstance()->getCadreMenu();
     
     if (image == NULL) {
+#ifdef OGS_SDL2
+        image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#else
         image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
-        
+#endif        
         SDL_Rect src;
         SDL_Rect dst;
         
@@ -69,8 +76,13 @@ void Free::init() {
         
         src.x = 0; src.y = 0; src.w = 320; src.h = 240;
         dst.x = 0; dst.y = 0;
+#ifdef OGS_SDL2
+        imageOptions = SDL_CreateRGBSurface(
+            SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#else        
         imageOptions = SDL_CreateRGBSurface(
             SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#endif
         SDL_BlitSurface(image, &src, imageOptions, &dst);
         src.w = 16; src.h = 16;
         
@@ -224,9 +236,11 @@ void Free::start(Joueur* joueur) {
 
 void Free::initPage() {
     if (imagePage) SDL_FreeSurface(imagePage);
-    
+#ifdef OGS_SDL2
+    imagePage = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#else    
     imagePage = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
-    
+#endif    
     SDL_Rect src;
     SDL_Rect dst;
         

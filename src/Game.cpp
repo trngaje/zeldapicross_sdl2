@@ -11,8 +11,13 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL2_rotozoom.h>
+#else
 #include <SDL/SDL.h>
 #include <SDL/SDL_rotozoom.h>
+#endif
 
 #include "Game.h"
 #include "Event.h"

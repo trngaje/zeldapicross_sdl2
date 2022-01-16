@@ -11,8 +11,13 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#else
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
+#endif
 #include "Audio.h"
 
 Mix_Music* music;
@@ -89,7 +94,7 @@ void Audio::loadSounds() {
     sfx_id[8] = Mix_LoadWAV("data/sound/textnext.ogg"); // suite texte
     sfx_id[9] = Mix_LoadWAV("data/sound/textend.ogg"); // fin texte
     sfx_id[10] = Mix_LoadWAV("data/sound/happy.ogg"); // trouve objet
-    sfx_id[11] = Mix_LoadWAV("data/sound/sword.ogg"); // épée
+    sfx_id[11] = Mix_LoadWAV("data/sound/sword.ogg"); // ??
     sfx_id[12] = Mix_LoadWAV("data/sound/Sword360.ogg"); // spin
     sfx_id[13] = Mix_LoadWAV("data/sound/stamp.ogg"); // pose bombe
     sfx_id[14] = Mix_LoadWAV("data/sound/danger.ogg"); // danger

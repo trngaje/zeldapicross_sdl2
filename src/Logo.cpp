@@ -8,7 +8,11 @@
 
 */
 
+#ifdef OGS_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #include "Logo.h"
 #include "Resources.h"
