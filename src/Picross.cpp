@@ -85,7 +85,7 @@ void Picross::init(SDL_Surface* pcs, SDL_Surface* thm, PicrossMode pMode) {
             if (i >= width || j >= height) {
                 hidden[i][j] = EMPTY;
             } else {
-#ifdef OGS_SDL2
+#if 1 //def OGS_SDL2
                 hidden[i][j] = ((getPixel(pcs, i, j) & 0xffffff) == 0 ? OK : KO);
 #else
                 hidden[i][j] = (getPixel(pcs, i, j) == 0 ? OK : KO);

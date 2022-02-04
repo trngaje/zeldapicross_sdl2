@@ -49,7 +49,7 @@ void Joueur::init() {
     
     /*
     // -> bug avec les records 6 et 9
-    // -> vérifier si la comparaison pour les temps n'est pas faite avec les mauvais étages...
+    // -> v?ifier si la comparaison pour les temps n'est pas faite avec les mauvais ?ages...
     for (int i = 0; i < NB_MAPS; i++) {
         cout<<i<<" : "<<records[i]<<endl;
     }
@@ -72,8 +72,21 @@ void Joueur::save()
     im << id;
 	
 	char home[128], directory[128] ;
-	snprintf(home, sizeof(home), "%s/.config/zelda-picross", getenv("HOME"));
-	mkdir(home, 0755);
+	int nResult;
+	
+	snprintf(home, sizeof(home), "%s/.config", getenv("HOME"));
+	nResult=mkdir(home, 0755);
+	if (nResult == 0 || errno == EEXIST) {	
+		snprintf(home, sizeof(home), "%s/.config/zelda-picross", getenv("HOME"));
+		nResult=mkdir(home, 0755);
+		if (nResult != 0 && errno != EEXIST) {
+			fprintf(stderr, "[trngaje] cannot make %s folder\n", home);
+		}
+	}
+	else {
+		fprintf(stderr, "[trngaje] cannot make %s folder\n", home);
+	}
+	
 	snprintf(directory, sizeof(directory), "%s/zpicross-%d.dat", home, id);
 	
     ofstream f(directory, ios::out | ios::binary);

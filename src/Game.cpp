@@ -78,8 +78,20 @@ void Game::saveSystem() {
     
     //data/save/system.dat
 	char home[128], directory[128] ;
+	int nResult;
 	snprintf(home, sizeof(home), "%s/.config/zelda-picross", getenv("HOME"));
-	mkdir(home, 0755);
+	nResult=mkdir(home, 0755);
+	if (nResult == 0 || errno == EEXIST) {	
+		snprintf(home, sizeof(home), "%s/.config/zelda-picross", getenv("HOME"));
+		nResult=mkdir(home, 0755);
+		if (nResult != 0 && errno != EEXIST) {
+			fprintf(stderr, "[trngaje] cannot make %s folder\n", home);
+		}
+	}
+	else {
+		fprintf(stderr, "[trngaje] cannot make %s folder\n", home);
+	}	
+	
 	snprintf(directory, sizeof(directory), "%s/system.dat", home);
 	
     ofstream f(directory, ios::out | ios::binary);

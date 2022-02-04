@@ -48,7 +48,7 @@ void Ending::start(Joueur* joueur) {
 #ifdef OGS_SDL2
     rank = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else    
-    rank = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+    rank = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #endif
     SDL_Rect src;
     SDL_Rect dst;

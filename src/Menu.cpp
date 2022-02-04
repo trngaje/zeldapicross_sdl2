@@ -118,7 +118,7 @@ void Menu::start() {
 #ifdef OGS_SDL2
         imageMode = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16, 72+32+16, 32, 0, 0, 0, 0);
 #else
-        imageMode = SDL_CreateRGBSurface(SDL_HWSURFACE, 112+16, 72+32+16, 32, 0, 0, 0, 0);
+        imageMode = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16, 72+32+16, 32, 0, 0, 0, 0);
 #endif
         cadre(0, 0, 112+16, 72+32+16, imageMode);
         string text = Text::getInstance()->getText(TEXTS_BEFORE_MENU + 19);
@@ -138,7 +138,7 @@ void Menu::start() {
 #ifdef OGS_SDL2
         imageBaseProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
 #else
-        imageBaseProfil = SDL_CreateRGBSurface(SDL_HWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
+        imageBaseProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
 #endif
         cadre(0, 0, 112+16*6, 72+32+16, imageBaseProfil);
     }
@@ -148,7 +148,7 @@ void Menu::start() {
 #ifdef OGS_SDL2
         imageDelete = SDL_CreateRGBSurface(SDL_SWSURFACE, 112, 72, 32, 0, 0, 0, 0);
 #else
-        imageDelete = SDL_CreateRGBSurface(SDL_HWSURFACE, 112, 72, 32, 0, 0, 0, 0);
+        imageDelete = SDL_CreateRGBSurface(SDL_SWSURFACE, 112, 72, 32, 0, 0, 0, 0);
 #endif
         cadre(0, 0, 112, 72, imageDelete);
         string text = Text::getInstance()->getText(TEXTS_BEFORE_MENU + 16);
@@ -167,7 +167,7 @@ void Menu::start() {
 #ifdef OGS_SDL2
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else
-    image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+    image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #endif
     
     SDL_Rect src;
@@ -251,7 +251,7 @@ void Menu::initProfil() {
 #ifdef OGS_SDL2
         imageProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
 #else        
-        imageProfil = SDL_CreateRGBSurface(SDL_HWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
+        imageProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
 #endif
         
         SDL_Rect src;

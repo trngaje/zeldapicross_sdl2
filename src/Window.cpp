@@ -97,6 +97,8 @@ SDL_Surface* init(bool* zoom) // initialise SDL
 #ifdef OGS_SDL2
     sdlSurface = SDL_GetWindowSurface(sdlWindow);
 	return SDL_CreateRGBSurface(SDL_SWSURFACE, lcd_width, lcd_height, 32, 0, 0, 0, 0);
+#elif defined(MIYOO_MINI)
+        return SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 #else
         return SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
 #endif
@@ -134,13 +136,15 @@ void Window::loop() {
         dst.x=(lcd_width - dst.w) / 2;
         dst.y=(lcd_height - dst.h) / 2;
     }
-#endif
-    /*SDL_Rect src;
+#elif defined(MIYOO_MINI)
+    SDL_Rect src;
     SDL_Rect dst;
-    src.w=640; src.h=480; src.y=0;src.x=0;dst.x=0; dst.y=0;*/
-    
-    //SDL_Surface* gpScreen2 = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 16, 0, 0, 0, 0);
-    //SDL_Surface* gpScreen3 = NULL;
+    src.w=320; src.h=240; src.y=0;src.x=0;dst.x=0; dst.y=0;
+    dst.w=640; dst.h=480;
+    SDL_Surface* gpScreen2 = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+    //SDL_Surface* gpScreen3 = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+	SDL_Surface* gpScreen3 = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 16,  0xF800, 0x7E0, 0x1F, 0);    
+#endif
     
     Event* event;
     
@@ -161,9 +165,11 @@ void Window::loop() {
         gLoop = handleEvent(event, gpGame);
         
         gpGame->loop();
-        
+#ifdef MIYOO_MINI
+        gpGame->draw(gpScreen2);
+#else        
         gpGame->draw(gpScreen);
-        
+#endif        
         
         /*if (zoom || !fullscreen) {
             SDL_FreeSurface(gpScreen3);
@@ -177,6 +183,10 @@ void Window::loop() {
 		//SDL_FillRect(gpScreen, NULL, SDL_MapRGB(gpScreen->format, 255, 0, 0));
 		SDL_BlitScaled(gpScreen, &src, sdlSurface, &dst);
 		SDL_UpdateWindowSurface(sdlWindow);
+#elif defined(MIYOO_MINI)
+        SDL_SoftStretch(gpScreen2, &src, gpScreen3, &dst);
+        SDL_BlitSurface(gpScreen3, NULL, gpScreen, NULL);  
+        SDL_Flip(gpScreen);
 #else        
         SDL_Flip(gpScreen);
 #endif        
@@ -190,10 +200,11 @@ void Window::loop() {
     Audio::getInstance()->stopMusic();
     
     delete gpKeyboard;
-    
-   // SDL_FreeSurface(gpScreen2);
-   // SDL_FreeSurface(gpScreen3);
-    
+
+#ifdef MIYOO_MINI    
+    SDL_FreeSurface(gpScreen2);
+    SDL_FreeSurface(gpScreen3);
+#endif    
 }
 
 bool Window::handleEvent(Event* event, Game* gpGame) {
@@ -219,6 +230,8 @@ void Window::toggleFullScreen() {
     } else {*/
 #ifdef OGS_SDL2
 		gpScreen = SDL_CreateRGBSurface(SDL_SWSURFACE, lcd_width, lcd_height, 32, 0, 0, 0, 0);
+#elif defined(MIYOO_MINI)
+        gpScreen = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 #else
         gpScreen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
 #endif

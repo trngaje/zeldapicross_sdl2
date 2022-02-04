@@ -58,7 +58,7 @@ void Options::start() {
 #ifdef OGS_SDL2
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else
-    image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+    image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #endif    
     SDL_Rect src;
     SDL_Rect dst;

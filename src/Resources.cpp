@@ -91,6 +91,8 @@ SDL_Surface* Resources::convertImage(SDL_Surface* tmp) {
     if (tmp == NULL) return NULL;
 #ifdef OGS_SDL2
     SDL_Surface* im = SDL_ConvertSurfaceFormat(tmp,  SDL_GetWindowPixelFormat(sdlWindow), 0);
+#elif defined(MIYOO_MINI)
+    SDL_Surface* im = SDL_DisplayFormatAlpha(tmp);
 #else
     SDL_Surface* im = SDL_DisplayFormat(tmp);
 #endif

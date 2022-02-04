@@ -59,7 +59,7 @@ void Records::start(int r, int q, int f, int qt, int ft) {
 #ifdef OGS_SDL2
         imageErase = SDL_CreateRGBSurface(SDL_SWSURFACE, 112, 72, 32, 0, 0, 0, 0);
 #else
-        imageErase = SDL_CreateRGBSurface(SDL_HWSURFACE, 112, 72, 32, 0, 0, 0, 0);
+        imageErase = SDL_CreateRGBSurface(SDL_SWSURFACE, 112, 72, 32, 0, 0, 0, 0);
 #endif
         cadre(0, 0, 112, 72, imageErase);
         string text = Text::getInstance()->getText(TEXTS_BEFORE_MENU + 16);
@@ -76,7 +76,7 @@ void Records::start(int r, int q, int f, int qt, int ft) {
 #ifdef OGS_SDL2
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else
-    image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+    image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #endif
     
     SDL_Rect src;
