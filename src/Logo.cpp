@@ -38,10 +38,25 @@ Logo* Logo::getInstance() {
 }
 
 void Logo::handleEvent(Event* event) {
+#ifdef _3DS
+    if (event->RETURN) {
+		bMenuSelected = true;
+
+    }
+	else {
+		if (bMenuSelected) {
+			bMenuSelected = false;
+			Audio::getInstance()->playSound(1);
+			Game::getInstance()->setMode(TITLE);
+		}
+	}
+#else    
     if (event->RETURN) {
         Audio::getInstance()->playSound(1);
         Game::getInstance()->setMode(TITLE);
     }
+#endif
+
 }
 
 void Logo::draw(SDL_Surface* gpScreen) {

@@ -223,6 +223,35 @@ void Records::cadre(int x, int y, int w, int h, SDL_Surface* im) {
 }
 
 void Records::handleEvent(Event* event) {
+#ifdef _3DS
+    if (event->RETURN) {
+		bMenuSelected = true;
+
+    }
+	else {
+		if (bMenuSelected) {
+			bMenuSelected = false;
+			if (!erase) {
+				if (column == 0) {
+					Audio::getInstance()->playSound(2);
+					Game::getInstance()->setMode(MENU);
+				} else if (column == 1) {
+					erase = true;
+					line = 1;
+					Audio::getInstance()->playSound(1);
+				}
+			} else {
+				if (line == 0) {
+					Game::getInstance()->razRecords();
+					column = 1; // raz restart records
+				}
+				Audio::getInstance()->playSound(2);
+				erase = false;
+			}
+			return;
+		}
+	}
+#else    
     if (event->RETURN) {
         if (!erase) {
             if (column == 0) {
@@ -243,6 +272,7 @@ void Records::handleEvent(Event* event) {
         }
         return;
     }
+#endif
     
     if (event->LEFT && !erase) {
         column--;

@@ -50,6 +50,9 @@ class Records {
         SDL_Surface* curseurLink;
         SDL_Surface* imageCadre;
         SDL_Surface* curseurFee;
+#ifdef _3DS
+		bool bMenuSelected;
+#endif
 };
 
 #endif  // Records.h

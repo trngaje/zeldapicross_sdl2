@@ -35,6 +35,9 @@ class Logo {
         ~Logo();
         
         SDL_Surface* image;
+#ifdef _3DS
+		bool bMenuSelected;
+#endif
 };
 
 #endif  // Logo.h
