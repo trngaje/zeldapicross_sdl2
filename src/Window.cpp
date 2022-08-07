@@ -8,7 +8,9 @@
 
 */
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_rotozoom.h>
 #else
@@ -26,6 +28,11 @@ SDL_Surface* init(bool* zoom);
 
 Window::Window(bool full) : fullscreen(full), zoom(false) {
     gpScreen = init(&zoom);
+
+#ifdef _3DS
+    Audio* gpAudio = Audio::getInstance();
+    gpAudio->init();
+#endif
 }
 
 Window::~Window() {
@@ -40,21 +47,27 @@ int lcd_width, lcd_height;
 #endif
 SDL_Surface* init(bool* zoom) // initialise SDL
 {
+#ifdef _3DS
+    if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) == -1) {
+#else
     if(SDL_Init(SDL_INIT_VIDEO) == -1) 
     {
+#endif
         printf("Could not load SDL : %s\n", SDL_GetError());
         return NULL;
     }
-    
+#ifndef _3DS    
 	if(SDL_Init(SDL_INIT_AUDIO)==-1) 
 	{
 		printf("SDL_Init: %s\n", SDL_GetError());
 		exit(1);
 	}
-    
+#endif    
     atexit(SDL_Quit);
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    SDL_WM_SetCaption("Zelda Picross",NULL);
+#elif defined(OGS_SDL2)
 	SDL_DisplayMode DM;
 	SDL_GetCurrentDisplayMode(0, &DM);
         lcd_width = DM.w;
@@ -76,6 +89,7 @@ SDL_Surface* init(bool* zoom) // initialise SDL
     SDL_ShowCursor(SDL_DISABLE);
 
 
+
     /*SDL_Rect** modes;
     int gBpp = 0;
     
@@ -93,8 +107,10 @@ SDL_Surface* init(bool* zoom) // initialise SDL
         *zoom = true;
         return SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
     } else {*/
-    
-#ifdef OGS_SDL2
+
+#if defined(_3DS)    
+        return SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN|SDL_TOPSCREEN);
+#elif defined(OGS_SDL2)
     sdlSurface = SDL_GetWindowSurface(sdlWindow);
 	return SDL_CreateRGBSurface(SDL_SWSURFACE, lcd_width, lcd_height, 32, 0, 0, 0, 0);
 #elif defined(MIYOO_MINI)
@@ -110,8 +126,15 @@ void Window::loop() {
     if (gpScreen == NULL) {
         return;
     }
+
+#if defined(_3DS)
+    SDL_Rect src;
+    SDL_Rect dst;
+    src.w=640; src.h=480; src.y=0;src.x=0;dst.x=0; dst.y=0;
     
-#ifdef OGS_SDL2
+    SDL_Surface* gpScreen2 = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+    SDL_Surface* gpScreen3 = NULL;    
+#elif defined(OGS_SDL2)
    SDL_Rect src;
     src.w=320; src.h=240; src.y=0; src.x=0;
 
@@ -189,10 +212,13 @@ void Window::loop() {
         SDL_Flip(gpScreen);
 #else        
         SDL_Flip(gpScreen);
-#endif        
+#endif   
+
+#ifndef _3DS     
         if (SDL_GetTicks() < lastAnimTime + 20) {
             SDL_Delay(lastAnimTime+20-SDL_GetTicks());
         }
+#endif
         lastAnimTime = SDL_GetTicks();
     
     }
@@ -201,7 +227,7 @@ void Window::loop() {
     
     delete gpKeyboard;
 
-#ifdef MIYOO_MINI    
+#if defined(MIYOO_MINI) || defined(_3DS)    
     SDL_FreeSurface(gpScreen2);
     SDL_FreeSurface(gpScreen3);
 #endif    
@@ -228,7 +254,10 @@ void Window::toggleFullScreen() {
         gpScreen = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE
                                     |SDL_DOUBLEBUF|gFullScreen);
     } else {*/
-#ifdef OGS_SDL2
+#if defined(_3DS)
+        gpScreen = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE
+                                    |SDL_DOUBLEBUF|gFullScreen);
+#elif defined(OGS_SDL2)
 		gpScreen = SDL_CreateRGBSurface(SDL_SWSURFACE, lcd_width, lcd_height, 32, 0, 0, 0, 0);
 #elif defined(MIYOO_MINI)
         gpScreen = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);

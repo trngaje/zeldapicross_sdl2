@@ -16,6 +16,9 @@
 
 CaseIcon::CaseIcon(int theme) {
     imageTheme = Resources::getInstance()->getMap(theme);
+#ifdef _3DS
+	type = ID_ICON;
+#endif
 }
 
 CaseIcon::~CaseIcon() {

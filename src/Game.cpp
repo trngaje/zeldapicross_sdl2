@@ -8,6 +8,9 @@
 
 */
 
+#ifdef _3DS
+#include "3ds/SDL_3ds.h"
+#else
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -17,6 +20,7 @@
 #else
 #include <SDL/SDL.h>
 #include <SDL/SDL_rotozoom.h>
+#endif
 #endif
 
 #include "Game.h"
@@ -75,7 +79,9 @@ void Game::saveSystem() {
     if (!rToSave) {
         return;
     }
-    
+#ifdef _3DS
+    ofstream f("/3ds/ZeldaPicross/save/system.dat",ios::out | ios::binary);
+#else    
     //data/save/system.dat
 	char home[128], directory[128] ;
 	int nResult;
@@ -95,6 +101,7 @@ void Game::saveSystem() {
 	snprintf(directory, sizeof(directory), "%s/system.dat", home);
 	
     ofstream f(directory, ios::out | ios::binary);
+#endif
     f.write((char *)&volume,sizeof(int));
     f.write((char *)&volson,sizeof(int));
     f.write((char *)&rRank,sizeof(int));
@@ -107,13 +114,16 @@ void Game::saveSystem() {
 }
 
 void Game::loadSystem() {
-	
+#ifdef _3DS
+    ifstream f("/3ds/ZeldaPicross/save/system.dat",ios::in | ios::binary);
+#else	
 	char home[128], directory[128] ;
 	snprintf(home, sizeof(home), "%s/.config/zelda-picross", getenv("HOME"));
 	mkdir(home, 0755);
 	snprintf(directory, sizeof(directory), "%s/system.dat", home);
     
     ifstream f(directory, ios::in | ios::binary);
+#endif
     if(!f.is_open()) return;
     f.read((char *)&volume,sizeof(int));
     f.read((char *)&volson,sizeof(int));

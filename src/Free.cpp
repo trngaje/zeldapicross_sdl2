@@ -8,7 +8,9 @@
 
 */
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -47,7 +49,9 @@ void Free::init() {
     SDL_Surface* imageTmp = Resources::getInstance()->getCadreMenu();
     
     if (image == NULL) {
-#ifdef OGS_SDL2
+#if defined(_3DS)
+        image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
         image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else
         image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
@@ -76,7 +80,10 @@ void Free::init() {
         
         src.x = 0; src.y = 0; src.w = 320; src.h = 240;
         dst.x = 0; dst.y = 0;
-#ifdef OGS_SDL2
+#if defined(_3DS)
+        imageOptions = SDL_CreateRGBSurface(
+            SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
         imageOptions = SDL_CreateRGBSurface(
             SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else        
@@ -236,7 +243,9 @@ void Free::start(Joueur* joueur) {
 
 void Free::initPage() {
     if (imagePage) SDL_FreeSurface(imagePage);
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    imagePage = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
     imagePage = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else    
     imagePage = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);

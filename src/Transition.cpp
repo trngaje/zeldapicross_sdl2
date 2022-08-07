@@ -8,7 +8,9 @@
 
 */
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 #else
@@ -35,7 +37,9 @@ Transition* Transition::getInstance() {
 void Transition::init(TransitionMode m) {
     mode = m;
     SDL_FreeSurface(image);
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 16, 0, 0, 0, 0);

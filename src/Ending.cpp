@@ -8,7 +8,9 @@
 
 */
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -45,7 +47,9 @@ void Ending::start(Joueur* joueur) {
     
     SDL_Surface* tree = Resources::getInstance()->getTreeFond();
     SDL_FreeSurface(rank);
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    rank = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
     rank = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else    
     rank = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);

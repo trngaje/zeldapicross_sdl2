@@ -8,6 +8,9 @@
 
 */
 
+#ifdef _3DS
+#include "3ds/SDL_3ds.h"
+#else
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,6 +19,7 @@
 #else
 #include <SDL/SDL.h>
 #endif
+#endif
 
 #include "Menu.h"
 #include "Resources.h"
@@ -23,6 +27,7 @@
 #include "Audio.h"
 #include "Text.h"
 
+#ifndef _3DS
 static void remove_save(int test)
 {
 	char home[128], directory[128] ;
@@ -31,6 +36,7 @@ static void remove_save(int test)
 	snprintf(directory, sizeof(directory), "%s/zpicross-%d.dat", home, test);
 	remove(directory);
 }
+#endif
 
 Menu Menu::instance=Menu();
 
@@ -115,7 +121,9 @@ void Menu::start() {
     
     //mode
     if (imageMode == NULL) {
-#ifdef OGS_SDL2
+#if defined(_3DS)
+        imageMode = SDL_CreateRGBSurface(SDL_HWSURFACE, 112+16, 72+32+16, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
         imageMode = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16, 72+32+16, 32, 0, 0, 0, 0);
 #else
         imageMode = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16, 72+32+16, 32, 0, 0, 0, 0);
@@ -135,7 +143,9 @@ void Menu::start() {
     
     //profil
     if (imageBaseProfil == NULL) {
-#ifdef OGS_SDL2
+#if defined(_3DS)
+        imageBaseProfil = SDL_CreateRGBSurface(SDL_HWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
         imageBaseProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
 #else
         imageBaseProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
@@ -145,7 +155,9 @@ void Menu::start() {
     
     //erase
     if (imageDelete == NULL) {
-#ifdef OGS_SDL2
+#if defined(_3DS)
+        imageDelete = SDL_CreateRGBSurface(SDL_HWSURFACE, 112, 72, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
         imageDelete = SDL_CreateRGBSurface(SDL_SWSURFACE, 112, 72, 32, 0, 0, 0, 0);
 #else
         imageDelete = SDL_CreateRGBSurface(SDL_SWSURFACE, 112, 72, 32, 0, 0, 0, 0);
@@ -164,7 +176,9 @@ void Menu::start() {
     // build background
     SDL_Surface* imageTmp = Resources::getInstance()->getCadreMenu();
     if (image != NULL) SDL_FreeSurface(image);
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
@@ -248,7 +262,9 @@ Menu* Menu::getInstance() {
 void Menu::initProfil() {
     if (line != lastProfil) {
         SDL_FreeSurface(imageProfil);
-#ifdef OGS_SDL2
+#if defined(_3DS)
+        imageProfil = SDL_CreateRGBSurface(SDL_HWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
         imageProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
 #else        
         imageProfil = SDL_CreateRGBSurface(SDL_SWSURFACE, 112+16*6, 72+32+16, 32, 0, 0, 0, 0);
@@ -287,7 +303,105 @@ void Menu::initProfil() {
 
 void Menu::handleEvent(Event* event) {
     ostringstream oss;
-    
+
+#ifdef _3DS
+    if (event->RETURN) {
+		bMenuSelected = true;
+
+    }
+	else {
+		if (bMenuSelected) {
+			bMenuSelected = false;
+
+			if (line < 3) {
+				switch (mode) {
+					case SELECT_SAVE :
+						Audio::getInstance()->playSound(1);
+						if (loaded[line]) {
+							mode = SELECT_MODE;
+							lineFee = 0;
+						} else {
+							Audio::getInstance()->stopMusic();
+							Game::getInstance()->setSave(line + 1);
+							Game::getInstance()->setMode(INTRO);
+						}
+						break;
+					case SELECT_MODE :
+						switch (lineFee) {
+							case 0 : 
+								Audio::getInstance()->stopMusic();
+								Audio::getInstance()->playSound(1);
+								Game::getInstance()->setSave(line + 1);
+								Game::getInstance()->setMode(QUEST);
+								lastProfil = -1;
+								break;
+							case 1 :
+								Audio::getInstance()->stopMusic();
+								Audio::getInstance()->playSound(1);
+								Game::getInstance()->setSave(line + 1);
+								Game::getInstance()->setMode(FREE);
+								lastProfil = -1;
+								break;
+							case 2 :
+								Audio::getInstance()->playSound(1);
+								initProfil();
+								mode = PROFIL;
+								break;
+							case 3 :
+								Audio::getInstance()->playSound(1);
+								mode = DELETE;
+								lineFee = 1;
+								break;
+							case 4 :
+								mode = SELECT_SAVE;
+								Audio::getInstance()->playSound(2);
+								break;
+						}
+						break;
+					case PROFIL :
+						mode = SELECT_MODE;
+						Audio::getInstance()->playSound(2);
+						break;
+					case DELETE :
+						switch (lineFee) {
+							case 0 : // yes
+								Audio::getInstance()->playSound(2);
+	#ifdef _3DS
+								oss << (line+1);
+								remove(("/3ds/ZeldaPicross/save/zpicross" + oss.str() 
+									+ ".dat").c_str());
+	#else
+								//oss << (line+1);
+								remove_save((line+1));
+								/*remove(("data/save/zpicross" + oss.str() 
+									+ ".dat").c_str());*/
+	#endif
+								joueurs[line]->init();
+								start();
+								break;
+							case 1 : // no
+								Audio::getInstance()->playSound(2);
+								mode = SELECT_MODE;
+								lineFee = 2;
+								break;
+						}
+						break;
+				}
+			} else if (line == 3) {
+				if (column == 0) {
+					Audio::getInstance()->playSound(1);
+					Game::getInstance()->setMode(OPTIONS);
+				} else if (column == 1) {
+					Audio::getInstance()->playSound(1);
+					Game::getInstance()->setMode(RECORDS);
+				}
+			}
+			return;
+
+  
+		}
+	}
+#else    
     if (event->RETURN) {
         if (line < 3) {
             switch (mode) {
@@ -342,10 +456,16 @@ void Menu::handleEvent(Event* event) {
                     switch (lineFee) {
                         case 0 : // yes
                             Audio::getInstance()->playSound(2);
+#ifdef _3DS
+                            oss << (line+1);
+                            remove(("/3ds/ZeldaPicross/save/zpicross" + oss.str() 
+                                + ".dat").c_str());
+#else
                             //oss << (line+1);
                             remove_save((line+1));
                             /*remove(("data/save/zpicross" + oss.str() 
                                 + ".dat").c_str());*/
+#endif
                             joueurs[line]->init();
                             start();
                             break;
@@ -368,6 +488,9 @@ void Menu::handleEvent(Event* event) {
         }
         return;
     }
+  
+#endif
+    
     
     switch (mode) {
         case SELECT_SAVE :

@@ -56,7 +56,9 @@
 #include <iostream>
 #include <fstream>
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #else

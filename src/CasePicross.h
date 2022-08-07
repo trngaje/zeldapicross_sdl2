@@ -11,7 +11,9 @@
 #ifndef __CASEPICROSS_H__
 #define __CASEPICROSS_H__
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -19,6 +21,10 @@
 
 #include "Common.h"
 #include "CaseMap.h"
+
+#ifdef _3DS
+#define ID_PICROSS 1
+#endif
 
 class CasePicross : public CaseMap {
     public :

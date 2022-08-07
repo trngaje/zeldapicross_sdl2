@@ -8,7 +8,9 @@
 
 */
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -55,7 +57,9 @@ void Options::start() {
     
     // build background
     if (image != NULL) SDL_FreeSurface(image);
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
@@ -180,6 +184,33 @@ void Options::cadre(int x, int y, int w, int h) {
 }
 
 void Options::handleEvent(Event* event) {
+#ifdef _3DS
+    if (event->RETURN) {
+		bMenuSelected = true;
+
+    }
+	else {
+		if (bMenuSelected) {
+			bMenuSelected = false;
+			if (line == 2) {
+				if (column == 0) {
+					volume = volumeTmp;
+					volson = volsonTmp;
+					Game::getInstance()->setVolume(volume);
+					Game::getInstance()->setVolson(volson);
+					Game::getInstance()->saveSystem();
+					Audio::getInstance()->playSound(2);
+				} else if (column == 1) {
+					Audio::getInstance()->setVolume(volume);
+					Audio::getInstance()->setVolson(volson);
+					Audio::getInstance()->playSound(2);
+				}
+				Game::getInstance()->setMode(MENU);
+			}
+			return;
+		}
+	}
+#else    
     if (event->RETURN) {
         if (line == 2) {
             if (column == 0) {
@@ -198,6 +229,7 @@ void Options::handleEvent(Event* event) {
         }
         return;
     }
+#endif	
     
     if (event->UP) {
         line--;

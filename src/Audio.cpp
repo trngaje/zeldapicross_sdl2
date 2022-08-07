@@ -11,7 +11,11 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
-#ifdef OGS_SDL2
+
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#include <3ds.h>
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #else
@@ -20,11 +24,38 @@
 #endif
 #include "Audio.h"
 
+#ifndef _3DS
 Mix_Music* music;
 Mix_Chunk* sfx_id[16];
+#endif
 
 Audio Audio::instance=Audio();
 
+#ifdef _3DS
+FMUSIC_MODULE* Audio::choixMusique(int id) {
+    switch (id) {
+        case 1 : return FMUSIC_LoadSong("romfs:/music/Plaine.raw");
+        case 2 : return FMUSIC_LoadSong("romfs:/music/Home.raw");
+        case 3 : return FMUSIC_LoadSong("romfs:/music/Lac.raw");
+        case 4 : return FMUSIC_LoadSong("romfs:/music/Cocorico.raw");
+        case 5 : return FMUSIC_LoadSong("romfs:/music/Mont.raw");
+        case 6 : return FMUSIC_LoadSong("romfs:/music/BoisPerdus.raw");
+        case 7 : return FMUSIC_LoadSong("romfs:/music/Jeu.raw");
+        case 8 : return FMUSIC_LoadSong("romfs:/music/Chateau.raw");
+        case 9 : return FMUSIC_LoadSong("romfs:/music/Boss.raw");
+        case 10 : return FMUSIC_LoadSong("romfs:/music/DFinal.raw");
+        case 11 : return FMUSIC_LoadSong("romfs:/music/BossF.raw");
+        case 12 : return FMUSIC_LoadSong("romfs:/music/Zelda.raw");
+        case 190 : return FMUSIC_LoadSong("romfs:/music/Selection.raw");
+        case 195 : return FMUSIC_LoadSong("romfs:/music/Magasin.raw");
+        case 200 : return FMUSIC_LoadSong("romfs:/music/Titre.raw");
+        case 210 : return FMUSIC_LoadSong("romfs:/music/Debut.raw");
+        case 220 : return FMUSIC_LoadSong("romfs:/music/Mort.raw");
+        case 230 : return FMUSIC_LoadSong("romfs:/music/Fin.raw");
+        default : return FMUSIC_LoadSong("romfs:/music/Plaine.raw");
+    }
+}
+#else
 static Mix_Music* choixMusique(int id) 
 {
     switch (id) {
@@ -72,9 +103,11 @@ static Mix_Music* choixMusique(int id)
 #endif
     }
 }
+#endif
 
 Audio::Audio() : volume(0), musiqueId(0), playing(false) 
 {
+#ifndef _3DS	
 	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) 
 	{
 		fprintf(stderr, "Mix_OpenAudio: %s\n", Mix_GetError());
@@ -95,14 +128,41 @@ Audio::Audio() : volume(0), musiqueId(0), playing(false)
     music = NULL;
 	loadSounds();
 
+#endif
 }
 
 Audio::~Audio() {
+#ifdef _3DS
+    if (SOUND) {
+        freeSounds();
+        FMUSIC_StopSong(music);
+        FMUSIC_SetMasterVolume(music, previous_volume);
+        FMUSIC_FreeSong(music);
+        FSOUND_SetSFXMasterVolume(previous_volson);
+        FSOUND_Close();
+    }
+#else
 	freeSounds();
 	Mix_HaltMusic();
 	Mix_FreeMusic(music);
 	Mix_CloseAudio();
+#endif
 }
+
+#ifdef _3DS
+void Audio::init() {
+   SOUND = FSOUND_Init(44100, 32, 0);
+    music = NULL;
+//SOUND=0; // to remove -> hack for no sound mode
+//setVolume(32);
+//setVolson(32);
+    if (SOUND) {
+        previous_volume = -1;
+        previous_volson = FSOUND_GetSFXMasterVolume();
+        loadSounds();
+    }
+}
+#endif
 
 Audio* Audio::getInstance() {
     return &instance;
@@ -110,14 +170,42 @@ Audio* Audio::getInstance() {
 
 void Audio::setVolume(int vol) 
 {
+#ifdef _3DS
+	volume=vol*4;
+    if (previous_volume == -1) previous_volume = FMUSIC_GetMasterVolume(music);
+    FMUSIC_SetMasterVolume(music, volume);
+#endif
 }
 
 void Audio::setVolson(int volson) 
 {
+#ifdef _3DS
+	FSOUND_SetSFXMasterVolume(volson*4);
+#endif
 }
 
 void Audio::loadSounds() {
-#ifdef MIYOO_MINI
+#if defined(_3DS)	
+    sons = new FSOUND_SAMPLE*[16];
+    
+    sons[0] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/text.ogg",0,0,0); // lettres
+    sons[1] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/menu1.ogg",0,0,0); // menu 1
+    sons[2] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/menu2.ogg",0,0,0); // menu 2
+    sons[3] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/menu3.ogg",0,0,0); // menu 3
+    sons[4] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/surprise.ogg",0,0,0); // surprise
+    sons[5] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/monte.ogg",0,0,0); // monte
+    sons[6] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/descend.ogg",0,0,0); // descend
+    sons[7] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/bomb.ogg",0,0,0); // bombe
+    sons[8] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/textnext.ogg",0,0,0); // suite texte
+    sons[9] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/textend.ogg",0,0,0); // fin texte
+    sons[10] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/happy.ogg",0,0,0); // trouve objet
+    sons[11] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/sword.ogg",0,0,0); // ??
+    sons[12] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/Sword360.ogg",0,0,0); // spin
+    sons[13] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/stamp.ogg",0,0,0); // pose bombe
+    sons[14] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/danger.ogg",0,0,0); // danger
+    sons[15] = FSOUND_Sample_Load(FSOUND_FREE, "romfs:/sound/hurt.ogg",0,0,0); // link se blesse
+ 
+#elif defined(MIYOO_MINI)
     sfx_id[0] = Mix_LoadWAV("data/sound/text.mp3"); // lettres
     sfx_id[1] = Mix_LoadWAV("data/sound/menu1.mp3"); // menu 1
     sfx_id[2] = Mix_LoadWAV("data/sound/menu2.mp3"); // menu 2
@@ -153,6 +241,7 @@ void Audio::loadSounds() {
     sfx_id[15] = Mix_LoadWAV("data/sound/hurt.ogg"); // link se blesse
 #endif
 
+#ifndef _3DS
 	for(int i=0; i<16; i++) {
 		if (sfx_id[i] == NULL) {
 			fprintf(stderr, "[trngaje] sfx_id[%d] is NULL\n", i);
@@ -162,10 +251,16 @@ void Audio::loadSounds() {
     if(Mix_PlayChannel(-1, sfx_id[0], 0) < 0) {
 		fprintf(stderr, "[trngaje] loadsounds : id=0 error\n");
 	}
-    
+#endif    
 }
 
 void Audio::freeSounds() {
+#ifdef _3DS
+    if (SOUND) {
+        for (int i = 0; i < 16; i++) FSOUND_Sample_Free(sons[i]);
+        delete[] sons;
+    }
+#else
 	unsigned char i;
 	for (i=0;i<16;i++)
 	{
@@ -175,24 +270,50 @@ void Audio::freeSounds() {
 			sfx_id[i] = NULL;
 		}
 	}
+#endif
 }
 
 void Audio::playSound(int id, int chl) 
 {
+#ifdef _3DS
+    if (SOUND) FSOUND_PlaySound(chl, sons[id]);
+#else
 	if (Mix_PlayChannel(-1, sfx_id[id], 0) < 0) {
 		fprintf(stderr, "[trngaje] playsound : id=%d error\n", id);
 	}
-		
+#endif		
 }
 
 void Audio::stopSound() 
 {
+#ifdef _3DS
+    if (SOUND) {
+    	FSOUND_StopSound(FSOUND_ALL); 
+    	musiqueId=0;
+    }
+#else
 	Mix_HaltChannel(-1);
 	musiqueId=0;
+#endif
 }
 
 void Audio::playMusic(int id) 
 {
+#ifdef _3DS
+    if (SOUND) {
+        if (musiqueId != id || !playing) {
+            musiqueId = id;
+            FMUSIC_StopSong(music);
+            FMUSIC_FreeSong(music);
+            music = choixMusique(id);
+            if (previous_volume == -1) previous_volume = FMUSIC_GetMasterVolume(music);
+            FMUSIC_SetMasterVolume(music, volume);
+            FMUSIC_SetLooping(music, 1);
+            FMUSIC_PlaySong(music);
+            playing = true;
+        }
+    }
+#else
 	if (musiqueId != id || !playing) 
 	{
 		musiqueId = id;
@@ -209,14 +330,25 @@ void Audio::playMusic(int id)
 		}
 		playing = true;
 	}
+#endif
 }
 
 void Audio::stopMusic() {
+#ifdef _3DS
+    if (SOUND) FMUSIC_StopSong(music);
+    playing = false;
+#else
 	 Mix_HaltMusic();
 	 playing = false;
+#endif
 }
 
 void Audio::replayMusic() {
+#ifdef _3DS
+    if (SOUND) FMUSIC_PlaySong(music);
+    playing = true;
+#else
 	 Mix_PlayMusic(music, -1);
 	 playing = true;
+#endif
 }

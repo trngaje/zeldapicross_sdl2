@@ -8,7 +8,9 @@
 
 */
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -79,7 +81,9 @@ void Keyboard::pollEvent() {
                 break;
         }
     }
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    int keys = SDL_GetKeyState(NULL);
+#elif defined(OGS_SDL2)
     Uint8* keys = (Uint8*)SDL_GetKeyboardState(NULL);
 #else    
     Uint8* keys = SDL_GetKeyState(NULL);
@@ -100,15 +104,26 @@ void Keyboard::pollKey(SDL_Event sdlEvent) {
         case SDLK_F4 :
             if (sdlEvent.key.keysym.mod & KMOD_ALT) event->QUIT=true;
             break;
+#ifdef _3DS
+        case SDLK_RETURN :
+#else
         case CONFIRM_BUTTON :
+#endif
             if (sdlEvent.key.keysym.mod & KMOD_CTRL) event->FULLSCREEN=true;
             break;
         default : break;
     }
 }
 
+#ifdef _3DS
+void Keyboard::pollKeys(int keys) {
+#else
 void Keyboard::pollKeys(Uint8* keys) {
-#ifdef OGS_SDL2
+#endif
+
+#if defined(_3DS)
+    if (keys & SDLK_UP) {
+#elif defined(OGS_SDL2)
     if (keys[SDL_SCANCODE_UP]) {
 #else
     if (keys[SDLK_UP]) {
@@ -146,7 +161,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->UP = false;
     }
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (keys&SDLK_DOWN) {
+#elif defined(OGS_SDL2)
     if (keys[SDL_SCANCODE_DOWN]) {
 #else    
     if (keys[SDLK_DOWN]) {
@@ -184,7 +201,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->DOWN = false;
     }
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (keys&SDLK_LEFT) {
+#elif defined(OGS_SDL2)
     if (keys[SDL_SCANCODE_LEFT]) {
 #else    
     if (keys[SDLK_LEFT]) {
@@ -222,7 +241,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->LEFT = false;
     }
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (keys&SDLK_RIGHT) {
+#elif defined(OGS_SDL2)
     if (keys[SDL_SCANCODE_RIGHT]) {
 #else    
     if (keys[SDLK_RIGHT]) {
@@ -262,7 +283,9 @@ void Keyboard::pollKeys(Uint8* keys) {
     
     
     event->ACTION = false;
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if ((keys&SDLK_w || keys&SDLK_z) && !event->HOLD_ACTION 
+#elif defined(OGS_SDL2)
     if ((keys[SDL_SCANCODE_LCTRL] || keys[SDL_SCANCODE_Z]) && !event->HOLD_ACTION  
 #else    
     if ((keys[SDLK_LCTRL] || keys[SDLK_z]) && !event->HOLD_ACTION  
@@ -271,7 +294,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->HOLD_ACTION = true;
         tmpAction = 1;
     }
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (!(keys&SDLK_w) && !(keys&SDLK_z) && event->HOLD_ACTION) {
+#elif defined(OGS_SDL2)
     if (!keys[SDL_SCANCODE_LCTRL] && !keys[SDL_SCANCODE_Z] && event->HOLD_ACTION) {
 #else    
     if (!keys[SDLK_LCTRL] && !keys[SDLK_z] && event->HOLD_ACTION) {
@@ -282,7 +307,9 @@ void Keyboard::pollKeys(Uint8* keys) {
     }
     
     event->FLAG = false;
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (keys&SDLK_x && !event->HOLD_ACTION  && !event->HOLD_FLAG 
+#elif defined(OGS_SDL2)
 	if (keys[SDL_SCANCODE_LALT] && !event->HOLD_ACTION  && !event->HOLD_FLAG 
 #else
     if (keys[SDLK_LALT] && !event->HOLD_ACTION  && !event->HOLD_FLAG 
@@ -291,7 +318,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->HOLD_FLAG = true;
         tmpAction = 1;
     }
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (!(keys&SDLK_x) && event->HOLD_FLAG) {
+#elif defined(OGS_SDL2)
     if (!keys[SDL_SCANCODE_LALT] && event->HOLD_FLAG) {
 #else
     if (!keys[SDLK_LALT] && event->HOLD_FLAG) {
@@ -302,7 +331,9 @@ void Keyboard::pollKeys(Uint8* keys) {
     }
     
     // cancel action
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if ((keys&SDLK_x) && event->HOLD_ACTION  && !event->HOLD_FLAG) {
+#elif defined(OGS_SDL2)
     if (keys[SDL_SCANCODE_LALT] && event->HOLD_ACTION  && !event->HOLD_FLAG) {
 #else
     if (keys[SDLK_LALT] && event->HOLD_ACTION  && !event->HOLD_FLAG) {
@@ -311,7 +342,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->CANCEL_ACTION = true;
         tmpAction = 1;
     }
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (!(keys&SDLK_x) && !(keys&SDLK_w) && !(keys&SDLK_z)
+#elif defined(OGS_SDL2)
     if (!keys[SDL_SCANCODE_LALT] && !keys[SDL_SCANCODE_LCTRL] && !keys[SDL_SCANCODE_Z] 
 #else
     if (!keys[SDLK_LALT] && !keys[SDLK_LCTRL] && !keys[SDLK_z] 
@@ -322,7 +355,9 @@ void Keyboard::pollKeys(Uint8* keys) {
     }
     
     // cancel flag
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if ((keys&SDLK_w || keys&SDLK_z) && !event->HOLD_ACTION  
+#elif defined(OGS_SDL2)
     if ((keys[SDL_SCANCODE_LCTRL] || keys[SDL_SCANCODE_Z]) && !event->HOLD_ACTION
 #else
     if ((keys[SDLK_LCTRL] || keys[SDLK_z]) && !event->HOLD_ACTION
@@ -332,7 +367,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->CANCEL_FLAG = true;
         tmpAction = 1;
     }
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (!(keys&SDLK_x) && !(keys&SDLK_w) && !(keys&SDLK_z) && event->CANCEL_FLAG) {
+#elif defined(OGS_SDL2)
     if (!keys[SDL_SCANCODE_LALT] && !keys[SDL_SCANCODE_LCTRL] && !keys[SDL_SCANCODE_Z] && event->CANCEL_FLAG) {
 #else
     if (!keys[SDLK_LALT] && !keys[SDLK_LCTRL] && !keys[SDLK_z] && event->CANCEL_FLAG) {
@@ -341,7 +378,16 @@ void Keyboard::pollKeys(Uint8* keys) {
         tmpAction = 0;
     }
     
-    
+#ifdef _3DS
+    if ((keys&SDLK_RETURN || keys&SDLK_KP_ENTER) && !tmpReturn) {
+        event->RETURN = true;
+        tmpReturn = 1;
+    }
+    if (!(keys&SDLK_RETURN) && !(keys&SDLK_KP_ENTER) && tmpReturn) {
+		event->RETURN = false;		
+        tmpReturn = 0;
+    }
+#else    
     event->RETURN = false;
 #ifdef OGS_SDL2
     if ((keys[CONFIRM_BUTTON] || keys[SDL_SCANCODE_KP_ENTER]) && !tmpReturn) {
@@ -358,9 +404,12 @@ void Keyboard::pollKeys(Uint8* keys) {
 #endif
         tmpReturn = 0;
     }
+#endif
     
     event->HYPOTHESE = false;
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (keys&SDLK_h && !event->HYPOTHESE && !tmpHypo) {
+#elif defined(OGS_SDL2)
     if (keys[SDL_SCANCODE_LSHIFT] && !event->HYPOTHESE && !tmpHypo) {
 #else
     if (keys[SDLK_LSHIFT] && !event->HYPOTHESE && !tmpHypo) {
@@ -368,7 +417,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->HYPOTHESE = true;
         tmpHypo = 1;
     }
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (!(keys&SDLK_h) && tmpHypo) {
+#elif defined(OGS_SDL2)
     if (!keys[SDL_SCANCODE_LSHIFT] && tmpHypo) {
 #else    
     if (!keys[SDLK_LSHIFT] && tmpHypo) {
@@ -377,7 +428,9 @@ void Keyboard::pollKeys(Uint8* keys) {
     }
     
     event->MOUSE_ON_OFF = false;
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (keys&SDLK_TAB && !event->MOUSE_ON_OFF && !tmpMouse) {
+#elif defined(OGS_SDL2)
     if (keys[SDL_SCANCODE_SPACE] && !event->MOUSE_ON_OFF && !tmpMouse) {
 #else
     if (keys[SDLK_SPACE] && !event->MOUSE_ON_OFF && !tmpMouse) {
@@ -385,7 +438,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->MOUSE_ON_OFF = true;
         tmpMouse = 1;
     }
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (!(keys&SDLK_TAB) && tmpMouse) {
+#elif defined(OGS_SDL2)
     if (!keys[SDL_SCANCODE_SPACE] && tmpMouse) {
 #else
     if (!keys[SDLK_SPACE] && tmpMouse) {
@@ -395,7 +450,9 @@ void Keyboard::pollKeys(Uint8* keys) {
     
     
     event->MUSIC_ON_OFF = false;
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if ((keys&SDLK_m || keys&SDLK_SEMICOLON) && !event->MUSIC_ON_OFF && !tmpMusic) {
+#elif defined(OGS_SDL2)
     if ((keys[SDLK_m] || keys[SDL_SCANCODE_SEMICOLON]) && !event->MUSIC_ON_OFF && !tmpMusic) {
 #else
     if ((keys[SDLK_m] || keys[SDLK_SEMICOLON]) && !event->MUSIC_ON_OFF && !tmpMusic) {
@@ -403,7 +460,9 @@ void Keyboard::pollKeys(Uint8* keys) {
         event->MUSIC_ON_OFF = true;
         tmpMusic = 1;
     }
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    if (!(keys&SDLK_m) && !(keys&SDLK_SEMICOLON) && tmpMusic) {
+#elif defined(OGS_SDL2)
     if (!keys[SDLK_m] && !keys[SDL_SCANCODE_SEMICOLON] && tmpMusic) {
 #else
     if (!keys[SDLK_m] && !keys[SDLK_SEMICOLON] && tmpMusic) {

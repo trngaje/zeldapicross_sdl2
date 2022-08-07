@@ -18,6 +18,9 @@
 extern SDL_Window* sdlWindow;
 #endif
 Uint32 getPixel(SDL_Surface *surface, int x, int y) {
+#ifdef _3DS
+	return GetPixel32(surface, x, y);
+#else
     int bpp = surface->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to retrieve */
     Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
@@ -37,6 +40,7 @@ Uint32 getPixel(SDL_Surface *surface, int x, int y) {
     default:
         return 0;       /* shouldn't happen, but avoids warnings */
     }
+#endif
 }
 
 Picross Picross::instance=Picross();
@@ -66,10 +70,12 @@ void Picross::init(SDL_Surface* pcs, SDL_Surface* thm, PicrossMode pMode) {
     xmin = x; xmax = x + width * 8 - 1; ymin = y; ymax = y + height * 8 - 1;
     xmouse = xmin + ((xmax - xmin) / 2);
     ymouse = ymin + ((ymax - ymin) / 2);
+#ifndef _3DS
 #ifdef OGS_SDL2
     SDL_WarpMouseInWindow(sdlWindow, xmouse, ymouse);
 #else
     SDL_WarpMouse(xmouse, ymouse);
+#endif
 #endif
     
     cursorX = useMouse ? width / 2 : 0;
@@ -865,10 +871,12 @@ void Picross::handleEvent(Event* event) {
         if (useMouse) {
             xmouse = PICROSS_X + cursorX * 8 + 4;
             ymouse = PICROSS_Y + cursorY * 8 + 4;
+#ifndef _3DS
 #ifdef OGS_SDL2
             SDL_WarpMouseInWindow(sdlWindow, xmouse, ymouse);
 #else
             SDL_WarpMouse(xmouse, ymouse);
+#endif
 #endif
         }
     }
@@ -885,7 +893,9 @@ void Picross::handleEvent(Event* event) {
 }
 
 void Picross::handleMouseEvent(Event* event) {
+#ifndef _3DS
     SDL_GetMouseState(&xmouse, &ymouse);
+#endif
     
     event->UP = false;
     event->DOWN = false;
@@ -904,10 +914,12 @@ void Picross::handleMouseEvent(Event* event) {
     if (xmouse > xmax) {xmouse = xmax; toReset = true;}
     if (ymouse < ymin) {ymouse = ymin; toReset = true;}
     if (ymouse > ymax) {ymouse = ymax; toReset = true;}
+#ifndef _3DS
 #ifdef OGS_SDL2
     if (toReset) SDL_WarpMouseInWindow(sdlWindow, xmouse, ymouse);
 #else
     if (toReset) SDL_WarpMouse(xmouse, ymouse);
+#endif
 #endif
     
     cursorX = (xmouse - xmin) / 8;
@@ -1077,7 +1089,17 @@ void Picross::drawChiffre(SDL_Surface* gpScreen, int value, int x1, int y1, int 
 void Picross::drawCursor(SDL_Surface* gpScreen, int x1, int y1, int w1, int h1, 
 Uint32 color) {
     SDL_Rect src;
-    
+
+#ifdef _3DS
+    src.x=x1; src.y=y1; src.w=w1; src.h=2;
+    SDL_FillRect(gpScreen, &src, color);
+    src.y+=h1-2;
+    SDL_FillRect(gpScreen, &src, color);
+    src.y-=(h1-2); src.h=h1; src.w=2;
+    SDL_FillRect(gpScreen, &src, color);
+    src.x+=(w1-2);
+    SDL_FillRect(gpScreen, &src, color);
+#else    
     src.x=x1; src.y=y1; src.w=w1; src.h=1;
     SDL_FillRect(gpScreen, &src, color);
     src.y+=h1-1;
@@ -1086,7 +1108,7 @@ Uint32 color) {
     SDL_FillRect(gpScreen, &src, color);
     src.x+=(w1-1);
     SDL_FillRect(gpScreen, &src, color);
-    
+#endif    
 }
 
 void Picross::drawMouse(SDL_Surface* gpScreen) {

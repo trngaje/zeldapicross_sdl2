@@ -18,6 +18,9 @@ CasePicross::CasePicross(int theme) : hasObject(true) {
     image = Resources::getInstance()->getMap(theme);
     imageIcon = Resources::getInstance()->getStatus();
     imageBoss = Resources::getInstance()->getBoss();
+#ifdef _3DS
+	type = ID_PICROSS;
+#endif
 }
 
 CasePicross::~CasePicross() {
@@ -55,7 +58,7 @@ void CasePicross::loadFromString(string line) {
 int CasePicross::getPicrossId() {return picrossId;}
 int CasePicross::getMusic() {return musique;}
 int CasePicross::getDegats() {return hasObject ? degats : 0;}
-int CasePicross::getTime() {return time;}
+int CasePicross::getTime() {return time * 3;} /* by trngaje */
 Object CasePicross::getRequired() {return required;}
 Object CasePicross::getObject() {return object;}
 int CasePicross::getNbPicross() {return nbPicross;}

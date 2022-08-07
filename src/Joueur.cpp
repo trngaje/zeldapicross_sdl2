@@ -8,9 +8,11 @@
 
 */
 
+#ifndef _3DS
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#endif
 #include "Joueur.h"
 #include "Resources.h"
 #include "Game.h"
@@ -70,7 +72,10 @@ void Joueur::save()
 {
     ostringstream im;
     im << id;
-	
+
+#ifdef _3DS
+    ofstream f(("/3ds/ZeldaPicross/save/zpicross" + im.str() + ".dat").c_str(),ios::out | ios::binary);
+#else	
 	char home[128], directory[128] ;
 	int nResult;
 	
@@ -90,6 +95,7 @@ void Joueur::save()
 	snprintf(directory, sizeof(directory), "%s/zpicross-%d.dat", home, id);
 	
     ofstream f(directory, ios::out | ios::binary);
+#endif
     f.write((char *)&map,sizeof(int));
     f.write((char *)&x,sizeof(int));
     f.write((char *)&y,sizeof(int));
@@ -120,7 +126,10 @@ void Joueur::load()
 {
     ostringstream im;
     im << id;
-	
+
+#ifdef _3DS
+    ifstream f(("/3ds/ZeldaPicross/save/zpicross" + im.str() + ".dat").c_str(),ios::in | ios::binary);
+#else	
 	char home[128], directory[128] ;
 	snprintf(home, sizeof(home), "%s/.config/zelda-picross", getenv("HOME"));
 	mkdir(home, 0755);
@@ -128,6 +137,7 @@ void Joueur::load()
 	
 
     ifstream f(directory,ios::in | ios::binary);
+#endif
     if(!f.is_open()) return;
     f.read((char *)&map,sizeof(int));
     f.read((char *)&x,sizeof(int));

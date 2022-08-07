@@ -1,4 +1,4 @@
-/*
+ /*
 
     Zelda Picross
 
@@ -53,8 +53,12 @@ void Map::init(int id) {
     
     ostringstream os;
     os << id;
+#ifdef _3DS
+    ifstream file(("romfs:/levels/map"+os.str()+".pmp").c_str());
+#else
     ifstream file(("data/levels/map"+os.str()+".pmp").c_str());
-    
+#endif
+
     string line;
     getline(file, line);
     loadFromString(line);
@@ -86,18 +90,33 @@ void Map::refresh(Joueur* gpJoueur) {
     xJoueur = gpJoueur->getX();
     yJoueur = gpJoueur->getY();
     
+#ifndef _3DS
     CaseIcon* ci = dynamic_cast<CaseIcon*>(map[xJoueur][yJoueur]);
     if (ci != NULL) {
         ci->setStatus(DONE);
     }
+#else
+    CaseIcon* ci = NULL;
+    if (map[xJoueur][yJoueur]->type==ID_ICON) {
+        ci = static_cast<CaseIcon*>(map[xJoueur][yJoueur]);
+		ci->setStatus(DONE);
+    }
+#endif
     
     picrossToDo = 0;
     cumulatedTime = 0;
     for (int j = 0; j < MAX_CASE_Y; j++) {
         for (int i = 0; i < MAX_CASE_X; i++) {
             if (map[i][j] != 0) {
+#ifndef _3DS 
                 CasePicross* cp = dynamic_cast<CasePicross*>(map[i][j]);
                 if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[i][j]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[i][j]);
+
+#endif
                     cp->setStatus(gpJoueur->getQuestTime(cp->getPicrossId()) ? DONE : TODO);
                     
                     if (cp->getStatus() == TODO) {
@@ -129,8 +148,14 @@ void Map::updateCoord(Joueur* gpJoueur, int nextCase) {
     for (int j = 0; j < MAX_CASE_Y; j++) {
         for (int i = 0; i < MAX_CASE_X; i++) {
             if (map[i][j] != 0) {
+#ifndef _3DS
                 CaseIcon* ci = dynamic_cast<CaseIcon*>(map[i][j]);
                 if(ci != NULL) {
+#else
+    CaseIcon* ci = NULL;
+    if (map[i][j]->type==ID_ICON) {
+        ci = static_cast<CaseIcon*>(map[i][j]);
+#endif
                     if (ci->getId() == nextCase) {
                         gpJoueur->setX(ci->getX());
                         gpJoueur->setY(ci->getY());
@@ -144,8 +169,14 @@ void Map::updateCoord(Joueur* gpJoueur, int nextCase) {
 
 void Map::playIconSound(int i, int j) {
     if (map[i][j] != 0) {
+#ifndef _3DS
         CaseIcon* ci = dynamic_cast<CaseIcon*>(map[i][j]);
         if(ci != NULL) {
+#else
+    CaseIcon* ci = NULL;
+    if (map[i][j]->type==ID_ICON) {
+        ci = static_cast<CaseIcon*>(map[i][j]);
+#endif
             if (ci->getImageId() == 8) {
                 Audio::getInstance()->playSound(5);
             } else if (ci->getImageId() == 9) {
@@ -204,92 +235,176 @@ int Map::getTimeToBeat() {return timeToBeat;}
 int Map::getObjectToWin() {return objectToWin;}
 
 int Map::getPicross(int x, int y) {
+#ifndef _3DS
     CasePicross* cp = dynamic_cast<CasePicross*>(map[x][y]);
     if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[x][y]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[x][y]);
+#endif
+
         return cp->getPicrossId();
     }
     return 0;
 }
 
 int Map::getNbPicross(int x, int y) {
+#ifndef _3DS
     CasePicross* cp = dynamic_cast<CasePicross*>(map[x][y]);
     if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[x][y]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[x][y]);
+#endif
+
         return cp->getNbPicross();
     }
     return 0;
 }
 
 int Map::getPicrossMusic(int x, int y) {
+#ifndef _3DS
     CasePicross* cp = dynamic_cast<CasePicross*>(map[x][y]);
     if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[x][y]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[x][y]);
+#endif
+
         return cp->getMusic();
     }
     return 0;
 }
 
 int Map::getDegats(int x, int y) {
+#ifndef _3DS
     CasePicross* cp = dynamic_cast<CasePicross*>(map[x][y]);
     if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[x][y]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[x][y]);
+#endif
+
         return cp->getDegats();
     }
     return 0;
 }
 
 int Map::getTime(int x, int y) {
+#ifndef _3DS
     CasePicross* cp = dynamic_cast<CasePicross*>(map[x][y]);
     if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[x][y]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[x][y]);
+#endif
+
         return cp->getTime();
     }
     return 0;
 }
 
 Object Map::getRequired(int x, int y) {
+#ifndef _3DS
     CasePicross* cp = dynamic_cast<CasePicross*>(map[x][y]);
     if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[x][y]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[x][y]);
+#endif
+
         return cp->getRequired();
     }
     return NOTHING;
 }
 
 Object Map::getObject(int x, int y) {
+#ifndef _3DS
     CasePicross* cp = dynamic_cast<CasePicross*>(map[x][y]);
     if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[x][y]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[x][y]);
+#endif
+
         return cp->getObject();
     }
     return NOTHING;
 }
 
 bool Map::hasObject(int x, int y) {
+#ifndef _3DS
     CasePicross* cp = dynamic_cast<CasePicross*>(map[x][y]);
     if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[x][y]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[x][y]);
+#endif
+
         return (cp->isHasObject());
     }
     return false;
 }
 
 int Map::getDestLvl(int x, int y) {
+#ifndef _3DS
     CaseIcon* ci = dynamic_cast<CaseIcon*>(map[x][y]);
     if(ci != NULL) {
+#else
+    CaseIcon* ci = NULL;
+    if (map[x][y]->type==ID_ICON) {
+        ci = static_cast<CaseIcon*>(map[x][y]);
+#endif
+
         return ci->getDestLvl();
     }
     return -1;
 }
 
 int Map::getDestCase(int x, int y) {
+#ifndef _3DS
     CaseIcon* ci = dynamic_cast<CaseIcon*>(map[x][y]);
     if(ci != NULL) {
+#else
+   CaseIcon* ci = NULL;
+    if (map[x][y]->type==ID_ICON) {
+        ci = static_cast<CaseIcon*>(map[x][y]);
+#endif
+
         return ci->getDestCase();
     }
     return -1;
 }
 
 string Map::getText(int x, int y) {
+#ifndef _3DS
     CaseIcon* ci = dynamic_cast<CaseIcon*>(map[x][y]);
     if(ci != NULL) {
+#else
+   CaseIcon* ci = NULL;
+    if (map[x][y]->type==ID_ICON) {
+        ci = static_cast<CaseIcon*>(map[x][y]);
+#endif
+
         return Text::getInstance()->getText(ci->getDestLvl() + 1 + TEXTS_BEFORE_DEST_LVL);
     }
+#ifndef _3DS
     CasePicross* cp = dynamic_cast<CasePicross*>(map[x][y]);
     if(cp != NULL) {
+#else
+    CasePicross* cp = NULL;
+    if (map[x][y]->type==ID_PICROSS) {
+        cp = static_cast<CasePicross*>(map[x][y]);
+#endif
+
         int nbPicross = cp->getNbPicross();
         int picrossId = cp->getPicrossId();
         if (nbPicross > 1) {

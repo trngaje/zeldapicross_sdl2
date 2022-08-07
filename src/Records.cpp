@@ -8,7 +8,9 @@
 
 */
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -56,7 +58,9 @@ void Records::start(int r, int q, int f, int qt, int ft) {
     
     //erase
     if (imageErase == NULL) {
-#ifdef OGS_SDL2
+#if defined(_3DS)
+        imageErase = SDL_CreateRGBSurface(SDL_HWSURFACE, 112, 72, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
         imageErase = SDL_CreateRGBSurface(SDL_SWSURFACE, 112, 72, 32, 0, 0, 0, 0);
 #else
         imageErase = SDL_CreateRGBSurface(SDL_SWSURFACE, 112, 72, 32, 0, 0, 0, 0);
@@ -73,7 +77,9 @@ void Records::start(int r, int q, int f, int qt, int ft) {
     
     // build background
     if (image != NULL) SDL_FreeSurface(image);
-#ifdef OGS_SDL2
+#if defined(_3DS)
+    image = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 32, 0, 0, 0, 0);
+#elif defined(OGS_SDL2)
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);
 #else
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 32, 0, 0, 0, 0);

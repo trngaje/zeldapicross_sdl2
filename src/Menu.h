@@ -11,7 +11,9 @@
 #ifndef __MENU_H__
 #define __MENU_H__
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -52,6 +54,9 @@ class Menu {
         SDL_Surface* imageDelete;
         SDL_Surface* curseurLink;
         SDL_Surface* curseurFee;
+#ifdef _3DS
+		bool bMenuSelected;
+#endif
 };
 
 #endif  // Menu.h

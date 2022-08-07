@@ -11,7 +11,9 @@
 #ifndef __KEYBOARD_H__
 #define __KEYBOARD_H__
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -28,7 +30,11 @@ class Keyboard {
         Event* getEvent();
     private :
         void pollKey(SDL_Event event);
+#ifdef _3DS
+        void pollKeys(int keys);
+#else
         void pollKeys(Uint8* keys);
+#endif
         
         int tmpDirUp;
         int tmpDirDown;

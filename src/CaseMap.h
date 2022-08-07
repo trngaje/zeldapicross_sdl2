@@ -11,7 +11,9 @@
 #ifndef __CASEMAP_H__
 #define __CASEMAP_H__
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -42,6 +44,9 @@ class CaseMap {
         void setForceRight(bool b);
         CaseMapState getStatus();
         void setStatus(CaseMapState status);
+#ifdef _3DS
+		int type;
+#endif
     protected :
         
         int id;

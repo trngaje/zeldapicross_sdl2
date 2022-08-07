@@ -50,7 +50,11 @@ class Text {
         void displayLetter(SDL_Surface* gpScreen, char c, int vx, int vy);
 
 #if 1
+#ifdef _3DS
+        void displayLetter_kor(SDL_Surface* surface, unsigned short symbol, int x, int y);
+#else
         void displayLetter_kor(SDL_Surface* gpScreen, unsigned short c, int vx, int vy);
+#endif
 		unsigned short utf8_to_unicode(unsigned char c1, unsigned char c2, unsigned char c3);
 #endif        
         int vitesse; // millisecondes entre 2 lettres
@@ -70,6 +74,9 @@ class Text {
         Uint32 lastAnimTime;
         SDL_Surface* imageFont;
         string texts[MAX_TEXTS + 1];
+#ifdef _3DS
+		bool bMenuSelected;
+#endif
 };
 
 #endif  // Text.h

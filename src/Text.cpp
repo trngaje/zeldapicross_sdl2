@@ -12,7 +12,9 @@
 #include <fstream>
 #include <iostream>
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #else
@@ -38,8 +40,13 @@ Text::~Text() {
 void Text::init() {
     lastAnimTime = SDL_GetTicks();
     imageFont = Resources::getInstance()->getFont();
+#ifdef _3DS
+    ifstream file("romfs:/texts/texts_kor.txt");
+    //ifstream file("romfs:/texts/texts.txt");
+#else
     ifstream file("data/texts/texts_kor.txt");
     //ifstream file("data/texts/texts.txt");
+#endif
     string line;
     int i = 1;
 	int length;
@@ -51,6 +58,10 @@ void Text::init() {
         texts[i++] = line;
     }
     file.close();
+
+#ifdef _3DS	
+	bMenuSelected = false;
+#endif
 }
 
 Text* Text::getInstance() {
@@ -78,10 +89,23 @@ void Text::handleEvent(Event* event) {
             }
         }
     }
-    
+
+#ifdef _3DS
+    if (event->RETURN) {
+		bMenuSelected = true;
+
+    }
+	else {
+		if (bMenuSelected) {
+			bMenuSelected = false;
+			next();
+		}
+	}
+#else    
     if (event->RETURN) {
         next();
     }
+#endif
 }
 
 void Text::chercheText() {
@@ -308,6 +332,9 @@ void Text::displayLetter(SDL_Surface* gpScreen, char c, int vx, int vy) {
     dst.x=vx; dst.y=vy;
     src.h=16;src.w=8;
     
+#ifdef _3DS
+    if(val==13) return;
+#endif
     if(val==32) return;
     
     // /
@@ -390,7 +417,44 @@ void Text::displayLetter(SDL_Surface* gpScreen, char c, int vx, int vy) {
     SDL_BlitSurface(imageFont, &src, gpScreen, &dst);
 }
 
-#if 1
+#ifdef _3DS
+#include "bitmapfont_11x11.h"
+void Text::displayLetter_kor(SDL_Surface* surface, unsigned short symbol, int x, int y) {	
+	//unsigned long *dst;
+
+	int l, u;
+	
+    SDL_Rect src;
+    SDL_Rect dst;
+    
+    
+	src.x=0;src.y=0;
+    src.h=1;src.w=2;
+	dst.w=1;
+	dst.h=1;	
+
+	/* in 3ds, surface->pixels is not working */
+	
+	for (l = 0; l < FONT_KOR_HEIGHT; l++)
+	{
+		//dst=(unsigned long*)surface->pixels + (surface->pitch/4)*(y+l) + x;
+		for (u = 0; u < FONT_KOR_WIDTH; u++)
+		{
+			unsigned char rem = 1 << (((u) + (l) * FONT_KOR_WIDTH) & 7);
+			unsigned char offset  = ((u) + (l) * FONT_KOR_WIDTH) >> 3;
+			if ((bitmap_kor_bin[FONT_KOR_OFFSET(symbol-0xac00) + offset] & rem) > 0)	{								
+				//*dst = 0xffffff;
+				dst.x=x+u;
+				dst.y=y+l+2;
+
+				SDL_BlitSurface(imageFont, &src, surface, &dst);
+			}
+			//dst++;
+
+		}
+	}
+}
+#else
 void Text::displayLetter_kor(SDL_Surface* gpScreen, unsigned short c, int vx, int vy) {
     SDL_Rect src;
     SDL_Rect dst;

@@ -11,7 +11,9 @@
 #ifndef __CASEICON_H__
 #define __CASEICON_H__
 
-#ifdef OGS_SDL2
+#if defined(_3DS)
+#include "3ds/SDL_3ds.h"
+#elif defined(OGS_SDL2)
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
@@ -19,6 +21,10 @@
 
 #include "Common.h"
 #include "CaseMap.h"
+
+#ifdef _3DS
+#define ID_ICON 2
+#endif
 
 class CaseIcon : public CaseMap {
     public :
